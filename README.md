@@ -1,6 +1,6 @@
 # harNESs
 
-This is an attempt at a NES emulator in rust
+A NES emulator.
 
 ## Resources
 
