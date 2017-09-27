@@ -3,12 +3,15 @@
 #[macro_use]
 extern crate lazy_static;
 
+#[cfg(test)]
+mod tests;
+
 const MOS_6502_CLOCK_RATE: usize = 1789773;
 const MOS_6502_MEMORY_SIZE: usize = 65536;
 
 pub type BitOffset = u8;
 pub type Word = u8;
-pub type DoubleWord = u16;
+pub type DWord = u16;
 pub type Pointer = u16;
 
 struct Ram {
@@ -20,7 +23,7 @@ impl Memory for Ram {
         0
     }
 
-    fn write(&self, address: Address, value: Word) -> Word {
+    fn write(&mut self, address: Address, value: Word) -> Word {
         0
     }
 }
@@ -62,34 +65,34 @@ impl Default for Ram {
 
 pub trait Memory: Default {
     fn read(&self, address: Address) -> Word;
-    fn write(&self, address: Address, value: Word) -> Word;
+    fn write(&mut self, address: Address, value: Word) -> Word;
 }
 
 #[no_mangle]
 #[derive(Default)]
 pub struct Flags {
-    carry: bool,
-    zero: bool,
-    interupt_disable: bool,
-    decimal_mode_flag: bool,
-    break_mode: bool,
-    unused: bool,
-    overflow: bool,
-    negative: bool,
+    pub carry: bool,
+    pub zero: bool,
+    pub interupt_disable: bool,
+    pub decimal_mode_flag: bool,
+    pub break_mode: bool,
+    pub unused: bool,
+    pub overflow: bool,
+    pub negative: bool,
 }
 
 #[derive(Default)]
 pub struct Cpu<M> {
     memory: Box<M>,
     cycles: usize,
-    program_counter: Pointer,
-    stack_pointer: Word,
-    accumulator: Word,
-    register_x: Word,
-    register_y: Word,
+    pub program_counter: Pointer,
+    pub stack_pointer: Word,
+    pub accumulator: Word,
+    pub register_x: Word,
+    pub register_y: Word,
     interrupt: Word,
-    stall: usize,
-    flags: Flags,
+    pub stall: usize,
+    pub flags: Flags,
 }
 
 macro_rules! is {
@@ -108,12 +111,15 @@ impl<M> Cpu<M> where M: Memory {
     #[inline(always)]
     fn adc(&mut self, address: Address) {
         let val = self.memory.read(address) as u16;
-        let prev = self.accumulator as DoubleWord;
-        let sum = prev + val + self.flags.carry as DoubleWord;
-        self.flags.carry = is!(sum & 255);
+        let prev = self.accumulator as DWord;
+        let sum = prev + val + self.flags.carry as DWord;
+
+        self.flags.carry = sum > 255;
         self.flags.overflow = (prev ^ val) & 128 == 0 && (prev as Word ^ sum as Word) & 128 == 128;
+
         self.flags.zero = is!(self.accumulator);
         self.flags.negative = is!(self.accumulator);
+
         self.accumulator = sum as Word;
     }
 
