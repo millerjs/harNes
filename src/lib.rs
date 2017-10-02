@@ -1,7 +1,9 @@
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code, unused_imports, unused_variables)]
 
 #[macro_use]
 extern crate lazy_static;
+
+use std::num::Wrapping;
 
 #[cfg(test)]
 mod tests;
@@ -95,11 +97,7 @@ pub struct Cpu<M> {
     pub flags: Flags,
 }
 
-macro_rules! is {
-    ($value: expr) => {
-        $value != 0
-    };
-}
+macro_rules! is { ($value: expr) => { $value != 0 }; }
 
 impl<M> Cpu<M> where M: Memory {
     /// ADC - Add with Carry
@@ -110,15 +108,13 @@ impl<M> Cpu<M> where M: Memory {
     /// be performed.
     #[inline(always)]
     fn adc(&mut self, address: Address) {
-        let val = self.memory.read(address) as u16;
-        let prev = self.accumulator as DWord;
-        let sum = prev + val + self.flags.carry as DWord;
+        let mem = self.memory.read(address) as DWord;
+        let sum = mem as u16 + self.accumulator as DWord + self.flags.carry as DWord;
 
-        self.flags.carry = sum > 255;
-        self.flags.overflow = (prev ^ val) & 128 == 0 && (prev as Word ^ sum as Word) & 128 == 128;
-
-        self.flags.zero = is!(self.accumulator);
-        self.flags.negative = is!(self.accumulator);
+        self.flags.carry = is!(sum & 0b10000000);
+        self.flags.overflow =
+            (((self.accumulator ^ mem as Word) & 0b01000000) == 0b00000000) &&
+            (((self.accumulator ^ sum as Word) & 0b01000000) == 0b01000000);
 
         self.accumulator = sum as Word;
     }
