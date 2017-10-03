@@ -99,7 +99,30 @@ pub struct Cpu<M> {
 
 macro_rules! is { ($value: expr) => { $value != 0 }; }
 
+
+
 impl<M> Cpu<M> where M: Memory {
+    /// Loads word from address in memory
+    fn load(&self, address: Address) -> Word {
+        self.memory.read(address)
+    }
+
+    ///  the sign and zero flags
+    fn update_flags(&mut self) {
+        self.flags.zero = self.accumulator == 0;
+        self.flags.negative = is!(self.accumulator & 0b10000000)
+    }
+
+    /// Increments the program and returns the previous value
+    fn increment_program_counter(&mut self) -> DWord {
+        let previous_program_counter = self.program_counter;
+        self.program_counter += 1;
+        previous_program_counter
+    }
+
+    // ======================================================================
+    // Instructions
+
     /// ADC - Add with Carry
     ///
     /// This instruction adds the contents of a memory location to the
@@ -108,8 +131,8 @@ impl<M> Cpu<M> where M: Memory {
     /// be performed.
     #[inline(always)]
     fn adc(&mut self, address: Address) {
-        let mem = self.memory.read(address) as DWord;
-        let sum = mem as u16 + self.accumulator as DWord + self.flags.carry as DWord;
+        let mem = self.load(address) as DWord;
+        let sum = mem + self.accumulator as DWord + self.flags.carry as DWord;
 
         self.flags.carry = is!(sum & 0b10000000);
         self.flags.overflow =
@@ -117,13 +140,17 @@ impl<M> Cpu<M> where M: Memory {
             (((self.accumulator ^ sum as Word) & 0b01000000) == 0b01000000);
 
         self.accumulator = sum as Word;
+        self.update_flags()
     }
 
     /// AND - Logical AND
     ///
     /// A logical AND is performed, bit by bit, on the accumulator
     /// contents using the contents of a byte of memory.
-    fn and(&mut self) {}
+    fn and(&mut self, address: Address) {
+        self.accumulator &= self.load(address);
+        self.update_flags()
+    }
 
     /// ASL - Arithmetic Shift Left
     ///
@@ -133,7 +160,10 @@ impl<M> Cpu<M> where M: Memory {
     /// multiply the memory contents by 2 (ignoring 2's complement
     /// considerations), setting the carry if the result will not fit
     /// in 8 bits.
-    fn asl(&mut self) {}
+    fn asl(&mut self) {
+        self.flags.carry = is!(self.accumulator & 0b10000000);
+        self.accumulator <<= 1;
+    }
 
     /// BCC - Branch if Carry Clear
     ///
