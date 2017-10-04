@@ -75,8 +75,8 @@ pub trait Memory: Default {
 pub struct Flags {
     pub carry: bool,
     pub zero: bool,
-    pub interupt_disable: bool,
-    pub decimal_mode_flag: bool,
+    pub interrupt_disable: bool,
+    pub decimal_mode: bool,
     pub break_mode: bool,
     pub unused: bool,
     pub overflow: bool,
@@ -100,24 +100,40 @@ pub struct Cpu<M> {
 macro_rules! is { ($value: expr) => { $value != 0 }; }
 
 
-
 impl<M> Cpu<M> where M: Memory {
     /// Loads word from address in memory
+    #[inline(always)]
     fn load(&self, address: Address) -> Word {
         self.memory.read(address)
     }
 
     ///  the sign and zero flags
+    #[inline(always)]
     fn update_flags(&mut self) {
         self.flags.zero = self.accumulator == 0;
         self.flags.negative = is!(self.accumulator & 0b10000000)
     }
 
     /// Increments the program and returns the previous value
+    #[inline(always)]
     fn increment_program_counter(&mut self) -> DWord {
         let previous_program_counter = self.program_counter;
         self.program_counter += 1;
         previous_program_counter
+    }
+
+    /// All branches are relative mode and have a length of two
+    /// bytes
+    ///
+    /// A branch not taken requires two machine cycles. Add one if the
+    /// branch is taken and add one more if the branch crosses a page
+    /// boundary.
+    #[inline(always)]
+    fn branch(&mut self, condition: bool) {
+        let delta = self.load(self.increment_program_counter()) as i8;
+        if condition {
+            self.program_counter = (self.program_counter as i32 + delta as i32) as DWord;
+        }
     }
 
     // ======================================================================
@@ -125,10 +141,9 @@ impl<M> Cpu<M> where M: Memory {
 
     /// ADC - Add with Carry
     ///
-    /// This instruction adds the contents of a memory location to the
-    /// accumulator together with the carry bit. If overflow occurs
-    /// the carry bit is set, this enables multiple byte addition to
-    /// be performed.
+    /// Add the contents of a memory location to the accumulator
+    /// together with the carry bit. If overflow occurs the carry bit
+    /// is set, this enables multiple byte addition to be performed.
     #[inline(always)]
     fn adc(&mut self, address: Address) {
         let mem = self.load(address) as DWord;
@@ -163,6 +178,7 @@ impl<M> Cpu<M> where M: Memory {
     fn asl(&mut self) {
         self.flags.carry = is!(self.accumulator & 0b10000000);
         self.accumulator <<= 1;
+        self.update_flags()
     }
 
     /// BCC - Branch if Carry Clear
@@ -170,7 +186,8 @@ impl<M> Cpu<M> where M: Memory {
     /// If the carry flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bcc(&mut self) {
-        unimplemented!()
+        let condition = !self.flags.carry;
+        self.branch(condition)
     }
 
     /// BCS - Branch if Carry Set
@@ -178,7 +195,8 @@ impl<M> Cpu<M> where M: Memory {
     /// If the carry flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn bcs(&mut self) {
-        unimplemented!()
+        let condition = self.flags.carry;
+        self.branch(condition)
     }
 
     /// BEQ - Branch if Equal
@@ -186,7 +204,8 @@ impl<M> Cpu<M> where M: Memory {
     /// If the zero flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn beq(&mut self) {
-        unimplemented!()
+        let condition = !self.flags.zero;
+        self.branch(condition)
     }
 
     /// BIT - Bit Test
@@ -196,8 +215,11 @@ impl<M> Cpu<M> where M: Memory {
     /// with the value in memory to set or clear the zero flag, but
     /// the result is not kept. Bits 7 and 6 of the value from memory
     /// are copied into the N and V flags.
-    fn bit(&mut self) {
-        unimplemented!()
+    fn bit(&mut self, address: Address) {
+        let mem = self.load(address);
+        self.flags.zero     = !is!(mem & self.accumulator);
+        self.flags.negative =  is!(mem & 0b01000000);
+        self.flags.overflow =  is!(mem & 0b00100000);
     }
 
     /// BMI - Branch if Minus
@@ -205,7 +227,8 @@ impl<M> Cpu<M> where M: Memory {
     /// If the negative flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bmi(&mut self) {
-        unimplemented!()
+        let condition = self.flags.negative;
+        self.branch(condition)
     }
 
     /// BNE - Branch if Not Equal
@@ -213,7 +236,8 @@ impl<M> Cpu<M> where M: Memory {
     /// If the zero flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bne(&mut self) {
-        unimplemented!()
+        let condition = self.flags.zero;
+        self.branch(condition)
     }
 
     /// BPL - Branch if Positive
@@ -222,7 +246,8 @@ impl<M> Cpu<M> where M: Memory {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bpl(&mut self) {
-        unimplemented!()
+        let condition = !self.flags.negative;
+        self.branch(condition)
     }
 
     /// BRK - Force Interrupt
@@ -242,7 +267,8 @@ impl<M> Cpu<M> where M: Memory {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bvc(&mut self) {
-        unimplemented!()
+        let condition = !self.flags.overflow;
+        self.branch(condition)
     }
 
     /// BVS - Branch if Overflow Set
@@ -250,21 +276,22 @@ impl<M> Cpu<M> where M: Memory {
     /// If the overflow flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bvs(&mut self) {
-        unimplemented!()
+        let condition = self.flags.overflow;
+        self.branch(condition)
     }
 
     /// CLC - Clear Carry Flag
     ///
     /// Set the carry flag to zero.
     fn clc(&mut self) {
-        unimplemented!()
+        self.flags.carry = false;
     }
 
     /// CLD - Clear Decimal Mode
     ///
     /// Sets the decimal mode flag to zero.
     fn cld(&mut self) {
-        unimplemented!()
+        self.flags.decimal_mode = false;
     }
 
     /// CLI - Clear Interrupt Disable
@@ -272,14 +299,14 @@ impl<M> Cpu<M> where M: Memory {
     /// Clears the interrupt disable flag allowing normal interrupt
     /// requests to be serviced.
     fn cli(&mut self) {
-        unimplemented!()
+        self.flags.interrupt_disable = false;
     }
 
     /// CLV - Clear Overflow Flag
     ///
     /// Clears the overflow flag.
     fn clv(&mut self) {
-        unimplemented!()
+        self.flags.overflow = false;
     }
 
     /// CMP - Compare
@@ -287,7 +314,7 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the accumulator with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cmp(&mut self) {
+    fn cmp(&mut self, address: Address) {
         unimplemented!()
     }
 
@@ -417,7 +444,9 @@ impl<M> Cpu<M> where M: Memory {
 
     /// NOP - No Operation
     ///
-    /// The NOP instruction causes no changes to the processor other than the normal incrementing of the program counter to the next instruction.
+    /// The NOP instruction causes no changes to the processor other
+    /// than the normal incrementing of the program counter to the
+    /// next instruction.
     fn nop(&mut self) {
         unimplemented!()
     }
