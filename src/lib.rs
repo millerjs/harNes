@@ -116,6 +116,14 @@ macro_rules! branch {
     }};
 }
 
+macro_rules! increment {
+    ($self:ident, $value: expr, $amount: expr) => {{
+        let result = ($value as Word).wrapping_add($amount as Word);
+        compare!($self, result, 0);
+        result
+    }};
+}
+
 
 impl<M> Cpu<M> where M: Memory {
     /// Delegates loading of address in memory
@@ -234,8 +242,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the zero flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn beq(&mut self) {
-        let condition = !self.flags.zero;
-        self.branch(condition)
+        branch!(self, self.flags.zero)
     }
 
     /// BIT - Bit Test
@@ -257,8 +264,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the negative flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bmi(&mut self) {
-        let condition = self.flags.negative;
-        self.branch(condition)
+        branch!(self, self.flags.negative)
     }
 
     /// BNE - Branch if Not Equal
@@ -266,8 +272,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the zero flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bne(&mut self) {
-        let condition = self.flags.zero;
-        self.branch(condition)
+        branch!(self, !self.flags.zero)
     }
 
     /// BPL - Branch if Positive
@@ -276,8 +281,7 @@ impl<M> Cpu<M> where M: Memory {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bpl(&mut self) {
-        let condition = !self.flags.negative;
-        self.branch(condition)
+        branch!(self, !self.flags.negative)
     }
 
     /// BRK - Force Interrupt
@@ -297,8 +301,7 @@ impl<M> Cpu<M> where M: Memory {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bvc(&mut self) {
-        let condition = !self.flags.overflow;
-        self.branch(condition)
+        branch!(self, !self.flags.overflow)
     }
 
     /// BVS - Branch if Overflow Set
@@ -306,8 +309,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the overflow flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bvs(&mut self) {
-        let condition = self.flags.overflow;
-        self.branch(condition)
+        branch!(self, self.flags.overflow)
     }
 
     /// CLC - Clear Carry Flag
@@ -371,8 +373,8 @@ impl<M> Cpu<M> where M: Memory {
     /// Subtracts one from the value held at a specified memory
     /// location setting the zero and negative flags as appropriate.
     fn dec(&mut self, address: Address) {
-        // let result = self.load(address.clone()) as i8 - 1;
-        // self.store(address, result as Word);
+        let result = increment!(self, self.load(address.clone()), -1i8);
+        self.store(address, result);
     }
 
     /// DEX - Decrement X Register
@@ -380,7 +382,7 @@ impl<M> Cpu<M> where M: Memory {
     /// Subtracts one from the X register setting the zero and
     /// negative flags as appropriate.
     fn dex(&mut self) {
-        unimplemented!()
+        self.register_x = increment!(self, self.register_x, -1i8);
     }
 
     /// DEY - Decrement Y Register
@@ -388,7 +390,7 @@ impl<M> Cpu<M> where M: Memory {
     /// Subtracts one from the Y register setting the zero and
     /// negative flags as appropriate.
     fn dey(&mut self) {
-        unimplemented!()
+        self.register_y = increment!(self, self.register_y, -1i8);
     }
 
     /// EOR - Exclusive OR
@@ -403,8 +405,9 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Adds one to the value held at a specified memory location
     /// setting the zero and negative flags as appropriate.
-    fn inc(&mut self) {
-        unimplemented!()
+    fn inc(&mut self, address: Address) {
+        let result = increment!(self, self.load(address.clone()), 1);
+        self.store(address, result);
     }
 
     /// INX - Increment X Register
@@ -412,7 +415,7 @@ impl<M> Cpu<M> where M: Memory {
     /// Adds one to the X register setting the zero and negative flags
     /// as appropriate.
     fn inx(&mut self) {
-        unimplemented!()
+        self.register_y = increment!(self, self.register_y, 1);
     }
 
     /// INY - Increment Y Register
@@ -420,14 +423,14 @@ impl<M> Cpu<M> where M: Memory {
     /// Adds one to the Y register setting the zero and negative flags
     /// as appropriate.
     fn iny(&mut self) {
-        unimplemented!()
+        self.register_x = increment!(self, self.register_x, 1);
     }
 
     /// JMP - Jump
     ///
     /// Sets the program counter to the address specified by the
     /// operand.
-    fn jmp(&mut self) {
+    fn jmp(&mut self, address: Address) {
         unimplemented!()
     }
 
