@@ -4,6 +4,7 @@
 extern crate lazy_static;
 
 use std::num::Wrapping;
+use std::cmp::Ord;
 
 #[cfg(test)]
 mod tests;
@@ -100,11 +101,33 @@ pub struct Cpu<M> {
 macro_rules! is { ($value: expr) => { $value != 0 }; }
 
 
+macro_rules! compare {
+    ($self:ident, $a: expr, $b: expr) => {{
+        let a = $a;
+        let b = $b;
+        $self.compare(a, b);
+    }};
+}
+
+macro_rules! branch {
+    ($self:ident, $condition: expr) => {{
+        let condition = $condition;
+        $self.branch(condition);
+    }};
+}
+
+
 impl<M> Cpu<M> where M: Memory {
-    /// Loads word from address in memory
+    /// Delegates loading of address in memory
     #[inline(always)]
     fn load(&self, address: Address) -> Word {
         self.memory.read(address)
+    }
+
+    /// Delegates writing of value to address in memory
+    #[inline(always)]
+    fn store(&mut self, address: Address, value: Word) -> Word {
+        self.memory.write(address, value)
     }
 
     ///  the sign and zero flags
@@ -122,6 +145,14 @@ impl<M> Cpu<M> where M: Memory {
         previous_program_counter
     }
 
+    /// Increments the program and returns the previous value
+    #[inline(always)]
+    fn compare<T: Ord>(&mut self, a: T, b: T) {
+        self.flags.zero     = a.eq(&b);
+        self.flags.negative = a.gt(&b);
+    }
+
+
     /// All branches are relative mode and have a length of two
     /// bytes
     ///
@@ -130,10 +161,11 @@ impl<M> Cpu<M> where M: Memory {
     /// boundary.
     #[inline(always)]
     fn branch(&mut self, condition: bool) {
-        let delta = self.load(self.increment_program_counter()) as i8;
-        if condition {
-            self.program_counter = (self.program_counter as i32 + delta as i32) as DWord;
-        }
+        // TODO
+        // let delta = self.load(self.increment_program_counter()) as i8;
+        // if condition {
+        //     self.program_counter = (self.program_counter as i32 + delta as i32) as DWord;
+        // }
     }
 
     // ======================================================================
@@ -186,8 +218,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the carry flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bcc(&mut self) {
-        let condition = !self.flags.carry;
-        self.branch(condition)
+        branch!(self, !self.flags.carry)
     }
 
     /// BCS - Branch if Carry Set
@@ -195,8 +226,7 @@ impl<M> Cpu<M> where M: Memory {
     /// If the carry flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn bcs(&mut self) {
-        let condition = self.flags.carry;
-        self.branch(condition)
+        branch!(self, self.flags.carry)
     }
 
     /// BEQ - Branch if Equal
@@ -315,7 +345,7 @@ impl<M> Cpu<M> where M: Memory {
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
     fn cmp(&mut self, address: Address) {
-        unimplemented!()
+        compare!(self, self.load(address), self.accumulator)
     }
 
     /// CPX - Compare X Register
@@ -323,8 +353,8 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the X register with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cpx(&mut self) {
-        unimplemented!()
+    fn cpx(&mut self, address: Address) {
+        compare!(self, self.load(address), self.register_x)
     }
 
     /// CPY - Compare Y Register
@@ -332,16 +362,17 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the Y register with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cpy(&mut self) {
-        unimplemented!()
+    fn cpy(&mut self, address: Address) {
+        compare!(self, self.load(address), self.register_y)
     }
 
     /// DEC - Decrement Memory
     ///
     /// Subtracts one from the value held at a specified memory
     /// location setting the zero and negative flags as appropriate.
-    fn dec(&mut self) {
-        unimplemented!()
+    fn dec(&mut self, address: Address) {
+        // let result = self.load(address.clone()) as i8 - 1;
+        // self.store(address, result as Word);
     }
 
     /// DEX - Decrement X Register
