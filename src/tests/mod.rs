@@ -14,14 +14,14 @@ impl Default for LinearMemory {
 }
 
 impl Memory for LinearMemory {
-    fn read(&self, address: Address) -> Word {
-        match address {
+    fn read(&self, address: &Address) -> Word {
+        match *address {
             Address::Absolute(address) => self.inner[address as usize],
             _ => 0
         }
     }
 
-    fn write(&mut self, address: Address, value: Word) -> Word {
+    fn write(&mut self, address: &Address, value: Word) -> Word {
         0
     }
 }

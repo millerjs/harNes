@@ -15,18 +15,17 @@ const MOS_6502_MEMORY_SIZE: usize = 65536;
 pub type BitOffset = u8;
 pub type Word = u8;
 pub type DWord = u16;
-pub type Pointer = u16;
 
 struct Ram {
     main: Vec<Word>,
 }
 
 impl Memory for Ram {
-    fn read(&self, address: Address) -> Word {
+    fn read(&self, address: &Address) -> Word {
         0
     }
 
-    fn write(&mut self, address: Address, value: Word) -> Word {
+    fn write(&mut self, address: &Address, value: Word) -> Word {
         0
     }
 }
@@ -37,19 +36,94 @@ pub struct Clock {
 
 #[derive(Clone)]
 pub enum Address {
-    Absolute(Pointer),
-    AbsoluteIndexedX(Pointer),
-    AbsoluteIndexedY(Pointer),
-    Accumulator(Pointer),
-    Immediate(Pointer),
-    Implicit(Pointer),
-    Indirect(Pointer),
-    IndirectIndexed(Pointer),
-    IndexedIndirect(Pointer),
-    Relative(Pointer),
-    ZeroPage(Pointer),
-    ZeroPageX(Pointer),
-    ZeroPageY(Pointer),
+    /// A full 16-bit address is specified and the byte at that
+    /// address is used to perform the computation. (e.g. LDX)
+    Absolute(DWord),
+
+    /// The value in X is added to the specified address for a sum
+    /// address. The value at the sum address is used to perform the
+    /// computation. (e.g. ADC)
+    AbsoluteIndexedX(Word),
+
+    /// The value in X is added to the specified address for a sum
+    /// address. The value at the sum address is used to perform the
+    /// computation. (e.g. INC)
+    AbsoluteIndexedY(Word),
+
+    /// The Accumulator is implied as the operand, so no address needs
+    /// to be specified. (e.g. ASL)
+    Accumulator,
+
+    /// The operand is used directly to perform the
+    /// computation. (e.g. LDA)
+    Immediate(Word),
+
+    /// The operand is implied, so it does not need to be
+    /// specified. (e.g. TXA)
+    Implicit,
+
+    /// The JMP instruction is the only instruction that uses this
+    /// addressing mode. It is a 3 byte instruction - the 2nd and 3rd
+    /// bytes are an absolute address. The set the PC to the address
+    /// stored at that address. So maybe this would be clearer.
+    Indirect(Word),
+
+    /// This mode is only used with the Y register. It differs in the
+    /// order that Y is applied to the indirectly fetched address. An
+    /// example instruction that uses indirect index addressing is LDA
+    /// ($86),Y . To calculate the target address, the CPU will first
+    /// fetch the address stored at zero page location $86. That
+    /// address will be added to register Y to get the final target
+    /// address. For LDA ($86),Y, if the address stored at $86 is
+    /// $4028 (memory is 0086: 28 40, remember little endian) and
+    /// register Y contains $10, then the final target address would
+    /// be $4038. Register A will be loaded with the contents of
+    /// memory at $4038.
+    ///
+    /// Indirect Indexed instructions are 2 bytes - the second byte is
+    /// the zero-page address - $20 in the example. (So the fetched
+    /// address has to be stored in the zero page.)
+    ///
+    /// While indexed indirect addressing will only generate a
+    /// zero-page address, this mode's target address is not wrapped -
+    /// it can be anywhere in the 16-bit address space.
+    IndirectIndexed(Word),
+
+    /// This mode is only used with the X register. Consider a
+    /// situation where the instruction is LDA ($20,X), X contains
+    /// $04, and memory at $24 contains 0024: 74 20, First, X is added
+    /// to $20 to get $24. The target address will be fetched from $24
+    /// resulting in a target address of $2074. Register A will be
+    /// loaded with the contents of memory at $2074.
+    ///
+    /// If X + the immediate byte will wrap around to a zero-page
+    /// address. So you could code that like targetAddress = X +
+    /// opcode[1]) & 0xFF .
+    ///
+    ///Indexed Indirect instructions are 2 bytes - the second byte is
+    /// the zero-page address - $20 in the example. Obviously the
+    /// fetched address has to be stored in the zero page.
+    IndexedIndirect(Word),
+
+    /// The offset specified is added to the current address stored in
+    /// the Program Counter (PC). Offsets can range from -128 to
+    /// +127. (e.g. BPL)
+    Relative(Word),
+
+    /// A single byte specifies an address in the first page of memory
+    /// ($00xx), also known as the zero page, and the byte at that
+    /// address is used to perform the computation. (e.g. LDY)
+    ZeroPage(Word),
+
+    /// The value in X is added to the specified zero page address for
+    /// a sum address. The value at the sum address is used to perform
+    /// the computation.
+    ZeroPageX(Word),
+
+    /// The value in Y is added to the specified zero page address for
+    /// a sum address. The value at the sum address is used to perform
+    /// the computation.
+    ZeroPageY(Word),
 }
 
 pub enum Interrupt {
@@ -67,8 +141,8 @@ impl Default for Ram {
 }
 
 pub trait Memory: Default {
-    fn read(&self, address: Address) -> Word;
-    fn write(&mut self, address: Address, value: Word) -> Word;
+    fn read(&self, address: &Address) -> Word;
+    fn write(&mut self, address: &Address, value: Word) -> Word;
 }
 
 #[no_mangle]
@@ -88,8 +162,8 @@ pub struct Flags {
 pub struct Cpu<M> {
     memory: Box<M>,
     cycles: usize,
-    pub program_counter: Pointer,
-    pub stack_pointer: Word,
+    pub program_counter: DWord,
+    pub stack_pointer: DWord,
     pub accumulator: Word,
     pub register_x: Word,
     pub register_y: Word,
@@ -128,13 +202,13 @@ macro_rules! increment {
 impl<M> Cpu<M> where M: Memory {
     /// Delegates loading of address in memory
     #[inline(always)]
-    fn load(&self, address: Address) -> Word {
+    fn load(&self, address: &Address) -> Word {
         self.memory.read(address)
     }
 
     /// Delegates writing of value to address in memory
     #[inline(always)]
-    fn store(&mut self, address: Address, value: Word) -> Word {
+    fn store(&mut self, address: &Address, value: Word) -> Word {
         self.memory.write(address, value)
     }
 
@@ -169,11 +243,11 @@ impl<M> Cpu<M> where M: Memory {
     /// boundary.
     #[inline(always)]
     fn branch(&mut self, condition: bool) {
-        // TODO
-        // let delta = self.load(self.increment_program_counter()) as i8;
-        // if condition {
-        //     self.program_counter = (self.program_counter as i32 + delta as i32) as DWord;
-        // }
+        let address = self.increment_program_counter();
+        let delta = self.load(&Address::Absolute(address)) as i8;
+        if condition {
+            self.program_counter = (self.program_counter as i32 + delta as i32) as DWord;
+        }
     }
 
     // ======================================================================
@@ -185,7 +259,7 @@ impl<M> Cpu<M> where M: Memory {
     /// together with the carry bit. If overflow occurs the carry bit
     /// is set, this enables multiple byte addition to be performed.
     #[inline(always)]
-    fn adc(&mut self, address: Address) {
+    fn adc(&mut self, address: &Address) {
         let mem = self.load(address) as DWord;
         let sum = mem + self.accumulator as DWord + self.flags.carry as DWord;
 
@@ -202,7 +276,7 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// A logical AND is performed, bit by bit, on the accumulator
     /// contents using the contents of a byte of memory.
-    fn and(&mut self, address: Address) {
+    fn and(&mut self, address: &Address) {
         self.accumulator &= self.load(address);
         self.update_flags()
     }
@@ -252,7 +326,7 @@ impl<M> Cpu<M> where M: Memory {
     /// with the value in memory to set or clear the zero flag, but
     /// the result is not kept. Bits 7 and 6 of the value from memory
     /// are copied into the N and V flags.
-    fn bit(&mut self, address: Address) {
+    fn bit(&mut self, address: &Address) {
         let mem = self.load(address);
         self.flags.zero     = !is!(mem & self.accumulator);
         self.flags.negative =  is!(mem & 0b01000000);
@@ -346,7 +420,7 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the accumulator with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cmp(&mut self, address: Address) {
+    fn cmp(&mut self, address: &Address) {
         compare!(self, self.load(address), self.accumulator)
     }
 
@@ -355,7 +429,7 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the X register with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cpx(&mut self, address: Address) {
+    fn cpx(&mut self, address: &Address) {
         compare!(self, self.load(address), self.register_x)
     }
 
@@ -364,7 +438,7 @@ impl<M> Cpu<M> where M: Memory {
     /// This instruction compares the contents of the Y register with
     /// another memory held value and sets the zero and carry flags as
     /// appropriate.
-    fn cpy(&mut self, address: Address) {
+    fn cpy(&mut self, address: &Address) {
         compare!(self, self.load(address), self.register_y)
     }
 
@@ -372,8 +446,8 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Subtracts one from the value held at a specified memory
     /// location setting the zero and negative flags as appropriate.
-    fn dec(&mut self, address: Address) {
-        let result = increment!(self, self.load(address.clone()), -1i8);
+    fn dec(&mut self, address: &Address) {
+        let result = increment!(self, self.load(address), -1i8);
         self.store(address, result);
     }
 
@@ -405,8 +479,8 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Adds one to the value held at a specified memory location
     /// setting the zero and negative flags as appropriate.
-    fn inc(&mut self, address: Address) {
-        let result = increment!(self, self.load(address.clone()), 1);
+    fn inc(&mut self, address: &Address) {
+        let result = increment!(self, self.load(address), 1);
         self.store(address, result);
     }
 
@@ -430,7 +504,7 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Sets the program counter to the address specified by the
     /// operand.
-    fn jmp(&mut self, address: Address) {
+    fn jmp(&mut self, address: &Address) {
         unimplemented!()
     }
 
@@ -447,24 +521,27 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Loads a byte of memory into the accumulator setting the zero
     /// and negative flags as appropriate.
-    fn lda(&mut self) {
-        unimplemented!()
+    fn lda(&mut self, address: &Address) {
+        self.accumulator = self.load(address);
+        compare!(self, self.accumulator, 0)
     }
 
     /// LDX - Load X Register
     ///
     /// Loads a byte of memory into the X register setting the zero
     /// and negative flags as appropriate.
-    fn ldx(&mut self) {
-        unimplemented!()
+    fn ldx(&mut self, address: &Address) {
+        self.register_x = self.load(address);
+        compare!(self, self.register_x, 0)
     }
 
     /// LDY - Load Y Register
     ///
     /// Loads a byte of memory into the Y register setting the zero
     /// and negative flags as appropriate.
-    fn ldy(&mut self) {
-        unimplemented!()
+    fn ldy(&mut self, address: &Address) {
+        self.register_y = self.load(address);
+        compare!(self, self.register_y, 0)
     }
 
     /// LSR - Logical Shift Right
@@ -472,8 +549,12 @@ impl<M> Cpu<M> where M: Memory {
     /// Each of the bits in A or M is shift one place to the
     /// right. The bit that was in bit 0 is shifted into the carry
     /// flag. Bit 7 is set to zero.
-    fn lsr(&mut self) {
-        unimplemented!()
+    fn lsr(&mut self, address: &Address) {
+        let value = self.load(address);
+        self.flags.carry = is!(0b10000000 & value);
+        let result = (value << 1) & 0b1;
+        compare!(self, result, 0);
+        self.store(address, value);
     }
 
     /// NOP - No Operation
@@ -481,23 +562,24 @@ impl<M> Cpu<M> where M: Memory {
     /// The NOP instruction causes no changes to the processor other
     /// than the normal incrementing of the program counter to the
     /// next instruction.
-    fn nop(&mut self) {
-        unimplemented!()
-    }
+    fn nop(&mut self, address: &Address) {}
 
     /// ORA - Logical Inclusive OR
     ///
     /// An inclusive OR is performed, bit by bit, on the accumulator
     /// contents using the contents of a byte of memory.
-    fn ora(&mut self) {
-        unimplemented!()
+    fn ora(&mut self, address: &Address) {
+        self.accumulator = self.load(address) | self.accumulator;
+        compare!(self, self.accumulator, 0);
     }
 
     /// PHA - Push Accumulator
     ///
     /// Pushes a copy of the accumulator on to the stack.
-    fn pha(&mut self) {
-        unimplemented!()
+    fn pha(&mut self, _: &Address) {
+        let address = &Address::Absolute(0x100 + self.stack_pointer);
+        let value = self.accumulator;
+        self.store(address, value);
     }
 
     /// PHP - Push Processor Status

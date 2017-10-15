@@ -17,7 +17,7 @@ mod test_adc {
 
     fn adc(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
         let mut cpu = simple_cpu(accumulator, mem);
-        cpu.adc(Address::Absolute(0));
+        cpu.adc(&Address::Absolute(0));
         cpu
     }
 
@@ -103,7 +103,7 @@ mod test_and {
 
     fn and(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
         let mut cpu = simple_cpu(accumulator, mem);
-        cpu.and(Address::Absolute(0));
+        cpu.and(&Address::Absolute(0));
         cpu
     }
 
