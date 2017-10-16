@@ -145,7 +145,6 @@ pub trait Memory: Default {
     fn write(&mut self, address: &Address, value: Word) -> Word;
 }
 
-#[no_mangle]
 #[derive(Default)]
 pub struct Flags {
     pub carry: bool,
@@ -198,6 +197,31 @@ macro_rules! increment {
     }};
 }
 
+impl Flags {
+    fn to_word(&self) -> Word {
+        let mut status = 0;
+        status &=  self.carry             as u8;
+        status &= (self.zero              as u8) << 1;
+        status &= (self.interrupt_disable as u8) << 2;
+        status &= (self.decimal_mode      as u8) << 3;
+        status &= (self.break_mode        as u8) << 4;
+        status &= (self.overflow          as u8) << 5;
+        status &= (self.negative          as u8) << 6;
+        status
+    }
+
+    fn from_word(word: Word) -> Flags {
+        self.carry             = is!(word & 0b00000001);
+        self.zero              = is!(word & 0b00000010);
+        self.interrupt_disable = is!(word & 0b00000100);
+        self.decimal_mode      = is!(word & 0b00001000);
+        self.break_mode        = is!(word & 0b00010000);
+        self.overflow          = is!(word & 0b00100000);
+        self.negative          = is!(word & 0b01000000);
+        self.carry             = is!(word & 0b10000000);
+
+    }
+}
 
 impl<M> Cpu<M> where M: Memory {
     /// Delegates loading of address in memory
@@ -577,9 +601,20 @@ impl<M> Cpu<M> where M: Memory {
     ///
     /// Pushes a copy of the accumulator on to the stack.
     fn pha(&mut self, _: &Address) {
-        let address = &Address::Absolute(0x100 + self.stack_pointer);
         let value = self.accumulator;
+        self.push(value);
+    }
+
+    fn push(&mut self, value: Word) {
+        let address = &Address::Absolute(0x100 + self.stack_pointer);
+        self.stack_pointer -= 1;
         self.store(address, value);
+    }
+
+    fn pop(&mut self) -> Word {
+        self.stack_pointer += 1;
+        let address = &Address::Absolute(0x100 + self.stack_pointer);
+        self.load(address)
     }
 
     /// PHP - Push Processor Status
