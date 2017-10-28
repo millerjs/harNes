@@ -1,0 +1,308 @@
+|Instruction |Addressing Mode  |Opcode |Flags         |
+|---         |---              |---    |---           |
+|ADC #$NN    |Immediate        |$69    |CZ- - - VN    |
+|ADC $NNNN   |Absolute         |$6d    |CZ- - - VN    |
+|ADC $NNNN,X |Absolute,X       |$7d    |CZ- - - VN    |
+|ADC $NNNN,Y |Absolute,Y       |$79    |CZ- - - VN    |
+|ADC $NN     |Zero Page        |$65    |CZ- - - VN    |
+|ADC $NN,X   |Zero Page,X      |$75    |CZ- - - VN    |
+|ADC ($NN,X) |Indexed Indirect |$61    |CZ- - - VN    |
+|ADC ($NN),Y |Indirect Indexed |$71    |CZ- - - VN    |
+|AND #$NN    |Immediate        |$29    |- Z- - - - N  |
+|AND $NNNN   |Absolute         |$2d    |- Z- - - - N  |
+|AND $NNNN,X |Absolute,X       |$3d    |- Z- - - - N  |
+|AND $NNNN,Y |Absolute,Y       |$39    |- Z- - - - N  |
+|AND $NN     |Zero Page        |$25    |- Z- - - - N  |
+|AND $NN,X   |Zero Page,X      |$35    |- Z- - - - N  |
+|AND ($NN,X) |Indexed Indirect |$21    |- Z- - - - N  |
+|AND ($NN),Y |Indirect Indexed |$31    |- Z- - - - N  |
+|ASL A       |Accumulator      |$0a    |CZ- - - - N   |
+|ASL $NNNN   |Absolute         |$0e    |CZ- - - - N   |
+|ASL $NNNN,X |Absolute,X       |$1e    |CZ- - - - N   |
+|ASL $NN     |Zero Page        |$06    |CZ- - - - N   |
+|ASL $NN,X   |Zero Page,X      |$16    |CZ- - - - N   |
+|BCC $NN     |Relative         |$90    |- - - - - - - |
+|BCS $NN     |Relative         |$b0    |- - - - - - - |
+|BEQ $NN     |Relative         |$f0    |- - - - - - - |
+|BIT $NNNN   |Absolute         |$2c    |- Z- - - VN   |
+|BIT $NN     |Zero Page        |$24    |- Z- - - VN   |
+|BMI $NN     |Relative         |$30    |- - - - - - - |
+|BNE $NN     |Relative         |$d0    |- - - - - - - |
+|BPL $NN     |Relative         |$10    |- - - - - - - |
+|BRK         |Implied          |$00    |- - - - - - - |
+|BVC $NN     |Relative         |$50    |- - - - - - - |
+|BVS $NN     |Relative         |$70    |- - - - - - - |
+|CLC         |Implied          |$18    |C- - - - - -  |
+|CLD         |Implied          |$d8    |- - - D- - -  |
+|CLI         |Implied          |$58    |- - I- - - -  |
+|CLV         |Implied          |$b8    |- - - - - V-  |
+|CMP #$NN    |Immediate        |$c9    |CZ- - - - N   |
+|CMP $NNNN   |Absolute         |$cd    |CZ- - - - N   |
+|CMP $NNNN,X |Absolute,X       |$dd    |CZ- - - - N   |
+|CMP $NNNN,Y |Absolute,Y       |$d9    |CZ- - - - N   |
+|CMP $NN     |Zero Page        |$c5    |CZ- - - - N   |
+|CMP $NN,X   |Zero Page,X      |$d5    |CZ- - - - N   |
+|CMP ($NN,X) |Indexed Indirect |$c1    |CZ- - - - N   |
+|CMP ($NN),Y |Indirect Indexed |$d1    |CZ- - - - N   |
+|CPX #$NN    |Immediate        |$e0    |CZ- - - - N   |
+|CPX $NNNN   |Absolute         |$ec    |CZ- - - - N   |
+|CPX $NN     |Zero Page        |$e4    |CZ- - - - N   |
+|CPY #$NN    |Immediate        |$c0    |CZ- - - - N   |
+|CPY $NNNN   |Absolute         |$cc    |CZ- - - - N   |
+|CPY $NN     |Zero Page        |$c4    |CZ- - - - N   |
+|DEC $NNNN   |Absolute         |$ce    |- Z- - - - N  |
+|DEC $NNNN,X |Absolute,X       |$de    |- Z- - - - N  |
+|DEC $NN     |Zero Page        |$c6    |- Z- - - - N  |
+|DEC $NN,X   |Zero Page,X      |$d6    |- Z- - - - N  |
+|DEX         |Implied          |$ca    |- Z- - - - N  |
+|DEY         |Implied          |$88    |- Z- - - - N  |
+|EOR #$NN    |Immediate        |$49    |- Z- - - - N  |
+|EOR $NNNN   |Absolute         |$4d    |- Z- - - - N  |
+|EOR $NNNN,X |Absolute,X       |$5d    |- Z- - - - N  |
+|EOR $NNNN,Y |Absolute,Y       |$59    |- Z- - - - N  |
+|EOR $NN     |Zero Page        |$45    |- Z- - - - N  |
+|EOR $NN,X   |Zero Page,X      |$55    |- Z- - - - N  |
+|EOR ($NN,X) |Indexed Indirect |$41    |- Z- - - - N  |
+|EOR ($NN),Y |Indirect Indexed |$51    |- Z- - - - N  |
+|INC $NNNN   |Absolute         |$ee    |- Z- - - - N  |
+|INC $NNNN,X |Absolute,X       |$fe    |- Z- - - - N  |
+|INC $NN     |Zero Page        |$e6    |- Z- - - - N  |
+|INC $NN,X   |Zero Page,X      |$f6    |- Z- - - - N  |
+|INX         |Implied          |$e8    |- Z- - - - N  |
+|INY         |Implied          |$c8    |- Z- - - - N  |
+|JMP $NNNN   |Absolute         |$4c    |- - - - - - - |
+|JMP $NN     |Indirect         |$6c    |- - - - - - - |
+|JSR $NNNN   |Absolute         |$20    |- - - - - - - |
+|LDA #$NN    |Immediate        |$a9    |- Z- - - - N  |
+|LDA $NNNN   |Absolute         |$ad    |- Z- - - - N  |
+|LDA $NNNN,X |Absolute,X       |$bd    |- Z- - - - N  |
+|LDA $NNNN,Y |Absolute,Y       |$b9    |- Z- - - - N  |
+|LDA $NN     |Zero Page        |$a5    |- Z- - - - N  |
+|LDA $NN,X   |Zero Page,X      |$b5    |- Z- - - - N  |
+|LDA ($NN,X) |Indexed Indirect |$a1    |- Z- - - - N  |
+|LDA ($NN),Y |Indirect Indexed |$b1    |- Z- - - - N  |
+|LDX #$NN    |Immediate        |$a2    |- Z- - - - N  |
+|LDX $NNNN   |Absolute         |$ae    |- Z- - - - N  |
+|LDX $NNNN,Y |Absolute,Y       |$be    |- Z- - - - N  |
+|LDX $NN     |Zero Page        |$a6    |- Z- - - - N  |
+|LDX $NN,Y   |Zero Page,Y      |$b6    |- Z- - - - N  |
+|LDY #$NN    |Immediate        |$a0    |- Z- - - - N  |
+|LDY $NNNN   |Absolute         |$ac    |- Z- - - - N  |
+|LDY $NNNN,X |Absolute,X       |$bc    |- Z- - - - N  |
+|LDY $NN     |Zero Page        |$a4    |- Z- - - - N  |
+|LDY $NN,X   |Zero Page,X      |$b4    |- Z- - - - N  |
+|LSR A       |Accumulator      |$4a    |CZ- - - - N   |
+|LSR $NNNN   |Absolute         |$4e    |CZ- - - - N   |
+|LSR $NNNN,X |Absolute,X       |$5e    |CZ- - - - N   |
+|LSR $NN     |Zero Page        |$46    |CZ- - - - N   |
+|LSR $NN,X   |Zero Page,X      |$56    |CZ- - - - N   |
+|NOP         |Implied          |$ea    |- - - - - - - |
+|ORA #$NN    |Immediate        |$09    |- Z- - - - N  |
+|ORA $NNNN   |Absolute         |$0d    |- Z- - - - N  |
+|ORA $NNNN,X |Absolute,X       |$1d    |- Z- - - - N  |
+|ORA $NNNN,Y |Absolute,Y       |$19    |- Z- - - - N  |
+|ORA $NN     |Zero Page        |$05    |- Z- - - - N  |
+|ORA $NN,X   |Zero Page,X      |$15    |- Z- - - - N  |
+|ORA ($NN,X) |Indexed Indirect |$01    |- Z- - - - N  |
+|ORA ($NN),Y |Indirect Indexed |$11    |- Z- - - - N  |
+|PHA         |Implied          |$48    |- - - - - - - |
+|PHP         |Implied          |$08    |- - - - - - - |
+|PLA         |Implied          |$68    |- Z- - - - N  |
+|PLP         |Implied          |$28    |CZIDBVN       |
+|ROL A       |Accumulator      |$2a    |CZ- - - - N   |
+|ROL $NNNN   |Absolute         |$2e    |CZ- - - - N   |
+|ROL $NNNN,X |Absolute,X       |$3e    |CZ- - - - N   |
+|ROL $NN     |Zero Page        |$26    |CZ- - - - N   |
+|ROL $NN,X   |Zero Page,X      |$36    |CZ- - - - N   |
+|ROR A       |Accumulator      |$6a    |CZ- - - - N   |
+|ROR $NNNN   |Absolute         |$7e    |CZ- - - - N   |
+|ROR $NNNN,X |Absolute,X       |$6e    |CZ- - - - N   |
+|ROR $NN     |Zero Page        |$66    |CZ- - - - N   |
+|ROR $NN,X   |Zero Page,X      |$76    |CZ- - - - N   |
+|RTI         |Implied          |$40    |- - - - - - - |
+|RTS         |Implied          |$60    |- - - - - - - |
+|SBC #$NN    |Immediate        |$e9    |CZ- - - VN    |
+|SBC $NNNN   |Absolute         |$ed    |CZ- - - VN    |
+|SBC $NNNN,X |Absolute,X       |$fd    |CZ- - - VN    |
+|SBC $NNNN,Y |Absolute,Y       |$f9    |CZ- - - VN    |
+|SBC $NN     |Zero Page        |$e5    |CZ- - - VN    |
+|SBC $NN,X   |Zero Page,X      |$f5    |CZ- - - VN    |
+|SBC ($NN,X) |Indexed Indirect |$e1    |CZ- - - VN    |
+|SBC ($NN),Y |Indirect Indexed |$f1    |CZ- - - VN    |
+|SEC         |Implied          |$38    |C- - - - - -  |
+|SED         |Implied          |$f8    |- - - D- - -  |
+|SEI         |Implied          |$78    |- - I- - - -  |
+|STA $NNNN   |Absolute         |$8d    |- - - - - - - |
+|STA $NNNN,X |Absolute,X       |$9d    |- - - - - - - |
+|STA $NNNN,Y |Absolute,Y       |$99    |- - - - - - - |
+|STA $NN     |Zero Page        |$85    |- - - - - - - |
+|STA $NN,X   |Zero Page,X      |$95    |- - - - - - - |
+|STA ($NN,X) |Indexed Indirect |$81    |- - - - - - - |
+|STA ($NN),Y |Indirect Indexed |$91    |- - - - - - - |
+|STX $NNNN   |Absolute         |$8e    |- - - - - - - |
+|STX $NN     |Zero Page        |$86    |- - - - - - - |
+|STX $NN,Y   |Zero Page,Y      |$96    |- - - - - - - |
+|STY $NNNN   |Absolute         |$8c    |- - - - - - - |
+|STY $NN     |Zero Page        |$84    |- - - - - - - |
+|STY $NN,X   |Zero Page,X      |$94    |- - - - - - - |
+|TAX         |Implied          |$aa    |- Z- - - - N  |
+|TAY         |Implied          |$a8    |- Z- - - - N  |
+|TSX         |Implied          |$ba    |- Z- - - - N  |
+|TXA         |Implied          |$8a    |- Z- - - - N  |
+|TXS         |Implied          |$9a    |- - - - - - - |
+|TYA         |Implied          |$98    |- Z- - - - N  |
+
+
+|Opcode |Instruction  |Addressing Mode  |Flags         |
+|---    |---          |---              |---           |
+|$00    |BRK          |Implied          |- - - - - - - |
+|$01    |ORA  ($NN,X) |Indexed Indirect |- Z- - - - N  |
+|$05    |ORA  $NN     |Zero Page        |- Z- - - - N  |
+|$06    |ASL  $NN     |Zero Page        |CZ- - - - N   |
+|$08    |PHP          |Implied          |- - - - - - - |
+|$09    |ORA  #$NN    |Immediate        |- Z- - - - N  |
+|$0a    |ASL  A       |Accumulator      |CZ- - - - N   |
+|$0d    |ORA  $NNNN   |Absolute         |- Z- - - - N  |
+|$0e    |ASL  $NNNN   |Absolute         |CZ- - - - N   |
+|$10    |BPL  $NN     |Relative         |- - - - - - - |
+|$11    |ORA  ($NN),Y |Indirect Indexed |- Z- - - - N  |
+|$15    |ORA  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$16    |ASL  $NN,X   |Zero Page,X      |CZ- - - - N   |
+|$18    |CLC          |Implied          |C- - - - - -  |
+|$19    |ORA  $NNNN,Y |Absolute,Y       |- Z- - - - N  |
+|$1d    |ORA  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$1e    |ASL  $NNNN,X |Absolute,X       |CZ- - - - N   |
+|$20    |JSR  $NNNN   |Absolute         |- - - - - - - |
+|$21    |AND  ($NN,X) |Indexed Indirect |- Z- - - - N  |
+|$24    |BIT  $NN     |Zero Page        |- Z- - - VN   |
+|$25    |AND  $NN     |Zero Page        |- Z- - - - N  |
+|$26    |ROL  $NN     |Zero Page        |CZ- - - - N   |
+|$28    |PLP          |Implied          |CZIDBVN       |
+|$29    |AND  #$NN    |Immediate        |- Z- - - - N  |
+|$2a    |ROL  A       |Accumulator      |CZ- - - - N   |
+|$2c    |BIT  $NNNN   |Absolute         |- Z- - - VN   |
+|$2d    |AND  $NNNN   |Absolute         |- Z- - - - N  |
+|$2e    |ROL  $NNNN   |Absolute         |CZ- - - - N   |
+|$30    |BMI  $NN     |Relative         |- - - - - - - |
+|$31    |AND  ($NN),Y |Indirect Indexed |- Z- - - - N  |
+|$35    |AND  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$36    |ROL  $NN,X   |Zero Page,X      |CZ- - - - N   |
+|$38    |SEC          |Implied          |C- - - - - -  |
+|$39    |AND  $NNNN,Y |Absolute,Y       |- Z- - - - N  |
+|$3d    |AND  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$3e    |ROL  $NNNN,X |Absolute,X       |CZ- - - - N   |
+|$40    |RTI          |Implied          |- - - - - - - |
+|$41    |EOR  ($NN,X) |Indexed Indirect |- Z- - - - N  |
+|$45    |EOR  $NN     |Zero Page        |- Z- - - - N  |
+|$46    |LSR  $NN     |Zero Page        |CZ- - - - N   |
+|$48    |PHA          |Implied          |- - - - - - - |
+|$49    |EOR  #$NN    |Immediate        |- Z- - - - N  |
+|$4a    |LSR  A       |Accumulator      |CZ- - - - N   |
+|$4c    |JMP  $NNNN   |Absolute         |- - - - - - - |
+|$4d    |EOR  $NNNN   |Absolute         |- Z- - - - N  |
+|$4e    |LSR  $NNNN   |Absolute         |CZ- - - - N   |
+|$50    |BVC  $NN     |Relative         |- - - - - - - |
+|$51    |EOR  ($NN),Y |Indirect Indexed |- Z- - - - N  |
+|$55    |EOR  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$56    |LSR  $NN,X   |Zero Page,X      |CZ- - - - N   |
+|$58    |CLI          |Implied          |- - I- - - -  |
+|$59    |EOR  $NNNN,Y |Absolute,Y       |- Z- - - - N  |
+|$5d    |EOR  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$5e    |LSR  $NNNN,X |Absolute,X       |CZ- - - - N   |
+|$60    |RTS          |Implied          |- - - - - - - |
+|$61    |ADC  ($NN,X) |Indexed Indirect |CZ- - - VN    |
+|$65    |ADC  $NN     |Zero Page        |CZ- - - VN    |
+|$66    |ROR  $NN     |Zero Page        |CZ- - - - N   |
+|$68    |PLA          |Implied          |- Z- - - - N  |
+|$69    |ADC  #$NN    |Immediate        |CZ- - - VN    |
+|$6a    |ROR  A       |Accumulator      |CZ- - - - N   |
+|$6c    |JMP  $NN     |Indirect         |- - - - - - - |
+|$6d    |ADC  $NNNN   |Absolute         |CZ- - - VN    |
+|$6e    |ROR  $NNNN,X |Absolute,X       |CZ- - - - N   |
+|$70    |BVS  $NN     |Relative         |- - - - - - - |
+|$71    |ADC  ($NN),Y |Indirect Indexed |CZ- - - VN    |
+|$75    |ADC  $NN,X   |Zero Page,X      |CZ- - - VN    |
+|$76    |ROR  $NN,X   |Zero Page,X      |CZ- - - - N   |
+|$78    |SEI          |Implied          |- - I- - - -  |
+|$79    |ADC  $NNNN,Y |Absolute,Y       |CZ- - - VN    |
+|$7d    |ADC  $NNNN,X |Absolute,X       |CZ- - - VN    |
+|$7e    |ROR  $NNNN   |Absolute         |CZ- - - - N   |
+|$81    |STA  ($NN,X) |Indexed Indirect |- - - - - - - |
+|$84    |STY  $NN     |Zero Page        |- - - - - - - |
+|$85    |STA  $NN     |Zero Page        |- - - - - - - |
+|$86    |STX  $NN     |Zero Page        |- - - - - - - |
+|$88    |DEY          |Implied          |- Z- - - - N  |
+|$8a    |TXA          |Implied          |- Z- - - - N  |
+|$8c    |STY  $NNNN   |Absolute         |- - - - - - - |
+|$8d    |STA  $NNNN   |Absolute         |- - - - - - - |
+|$8e    |STX  $NNNN   |Absolute         |- - - - - - - |
+|$90    |BCC  $NN     |Relative         |- - - - - - - |
+|$91    |STA  ($NN),Y |Indirect Indexed |- - - - - - - |
+|$94    |STY  $NN,X   |Zero Page,X      |- - - - - - - |
+|$95    |STA  $NN,X   |Zero Page,X      |- - - - - - - |
+|$96    |STX  $NN,Y   |Zero Page,Y      |- - - - - - - |
+|$98    |TYA          |Implied          |- Z- - - - N  |
+|$99    |STA  $NNNN,Y |Absolute,Y       |- - - - - - - |
+|$9a    |TXS          |Implied          |- - - - - - - |
+|$9d    |STA  $NNNN,X |Absolute,X       |- - - - - - - |
+|$a0    |LDY  #$NN    |Immediate        |- Z- - - - N  |
+|$a1    |LDA  ($NN,X) |Indexed Indirect |- Z- - - - N  |
+|$a2    |LDX  #$NN    |Immediate        |- Z- - - - N  |
+|$a4    |LDY  $NN     |Zero Page        |- Z- - - - N  |
+|$a5    |LDA  $NN     |Zero Page        |- Z- - - - N  |
+|$a6    |LDX  $NN     |Zero Page        |- Z- - - - N  |
+|$a8    |TAY          |Implied          |- Z- - - - N  |
+|$a9    |LDA  #$NN    |Immediate        |- Z- - - - N  |
+|$aa    |TAX          |Implied          |- Z- - - - N  |
+|$ac    |LDY  $NNNN   |Absolute         |- Z- - - - N  |
+|$ad    |LDA  $NNNN   |Absolute         |- Z- - - - N  |
+|$ae    |LDX  $NNNN   |Absolute         |- Z- - - - N  |
+|$b0    |BCS  $NN     |Relative         |- - - - - - - |
+|$b1    |LDA  ($NN),Y |Indirect Indexed |- Z- - - - N  |
+|$b4    |LDY  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$b5    |LDA  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$b6    |LDX  $NN,Y   |Zero Page,Y      |- Z- - - - N  |
+|$b8    |CLV          |Implied          |- - - - - V-  |
+|$b9    |LDA  $NNNN,Y |Absolute,Y       |- Z- - - - N  |
+|$ba    |TSX          |Implied          |- Z- - - - N  |
+|$bc    |LDY  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$bd    |LDA  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$be    |LDX  $NNNN,Y |Absolute,Y       |- Z- - - - N  |
+|$c0    |CPY  #$NN    |Immediate        |CZ- - - - N   |
+|$c1    |CMP  ($NN,X) |Indexed Indirect |CZ- - - - N   |
+|$c4    |CPY  $NN     |Zero Page        |CZ- - - - N   |
+|$c5    |CMP  $NN     |Zero Page        |CZ- - - - N   |
+|$c6    |DEC  $NN     |Zero Page        |- Z- - - - N  |
+|$c8    |INY          |Implied          |- Z- - - - N  |
+|$c9    |CMP  #$NN    |Immediate        |CZ- - - - N   |
+|$ca    |DEX          |Implied          |- Z- - - - N  |
+|$cc    |CPY  $NNNN   |Absolute         |CZ- - - - N   |
+|$cd    |CMP  $NNNN   |Absolute         |CZ- - - - N   |
+|$ce    |DEC  $NNNN   |Absolute         |- Z- - - - N  |
+|$d0    |BNE  $NN     |Relative         |- - - - - - - |
+|$d1    |CMP  ($NN),Y |Indirect Indexed |CZ- - - - N   |
+|$d5    |CMP  $NN,X   |Zero Page,X      |CZ- - - - N   |
+|$d6    |DEC  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$d8    |CLD          |Implied          |- - - D- - -  |
+|$d9    |CMP  $NNNN,Y |Absolute,Y       |CZ- - - - N   |
+|$dd    |CMP  $NNNN,X |Absolute,X       |CZ- - - - N   |
+|$de    |DEC  $NNNN,X |Absolute,X       |- Z- - - - N  |
+|$e0    |CPX  #$NN    |Immediate        |CZ- - - - N   |
+|$e1    |SBC  ($NN,X) |Indexed Indirect |CZ- - - VN    |
+|$e4    |CPX  $NN     |Zero Page        |CZ- - - - N   |
+|$e5    |SBC  $NN     |Zero Page        |CZ- - - VN    |
+|$e6    |INC  $NN     |Zero Page        |- Z- - - - N  |
+|$e8    |INX          |Implied          |- Z- - - - N  |
+|$e9    |SBC  #$NN    |Immediate        |CZ- - - VN    |
+|$ea    |NOP          |Implied          |- - - - - - - |
+|$ec    |CPX  $NNNN   |Absolute         |CZ- - - - N   |
+|$ed    |SBC  $NNNN   |Absolute         |CZ- - - VN    |
+|$ee    |INC  $NNNN   |Absolute         |- Z- - - - N  |
+|$f0    |BEQ  $NN     |Relative         |- - - - - - - |
+|$f1    |SBC  ($NN),Y |Indirect Indexed |CZ- - - VN    |
+|$f5    |SBC  $NN,X   |Zero Page,X      |CZ- - - VN    |
+|$f6    |INC  $NN,X   |Zero Page,X      |- Z- - - - N  |
+|$f8    |SED          |Implied          |- - - D- - -  |
+|$f9    |SBC  $NNNN,Y |Absolute,Y       |CZ- - - VN    |
+|$fd    |SBC  $NNNN,X |Absolute,X       |CZ- - - VN    |
+|$fe    |INC  $NNNN,X |Absolute,X       |- Z- - - - N  |
