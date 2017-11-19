@@ -21,7 +21,7 @@ impl Memory for LinearMemory {
         }
     }
 
-    fn write(&mut self, address: &Address, value: Word) -> Word {
-        0
+    fn write(&mut self, address: &Address, value: Word) {
+
     }
 }

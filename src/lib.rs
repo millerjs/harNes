@@ -25,8 +25,8 @@ impl Memory for Ram {
         0
     }
 
-    fn write(&mut self, address: &Address, value: Word) -> Word {
-        0
+    fn write(&mut self, address: &Address, value: Word) {
+
     }
 }
 
@@ -142,7 +142,7 @@ impl Default for Ram {
 
 pub trait Memory: Default {
     fn read(&self, address: &Address) -> Word;
-    fn write(&mut self, address: &Address, value: Word) -> Word;
+    fn write(&mut self, address: &Address, value: Word);
 }
 
 #[derive(Default)]
@@ -172,6 +172,11 @@ pub struct Cpu<M> {
 
 macro_rules! is { ($value: expr) => { $value != 0 }; }
 
+macro_rules! mask {
+    ($flag: expr, $bit: expr) => {
+        $flag as i8 << $bit
+    };
+}
 
 macro_rules! compare {
     ($self:ident, $a: expr, $b: expr) => {{
@@ -223,16 +228,24 @@ impl Flags {
 }
 
 impl<M> Cpu<M> where M: Memory {
-    /// Delegates loading of address in memory
+    /// Delegates loading of address in memory or loads from register
     #[inline(always)]
     fn load(&self, address: &Address) -> Word {
-        self.memory.read(address)
+        match *address {
+            Address::Accumulator => self.accumulator,
+            _                    => self.memory.read(address),
+        }
+
     }
 
-    /// Delegates writing of value to address in memory
+    /// Delegates writing of value to address in memory or writes to
+    /// register
     #[inline(always)]
-    fn store(&mut self, address: &Address, value: Word) -> Word {
-        self.memory.write(address, value)
+    fn store(&mut self, address: &Address, value: Word) {
+        match *address {
+            Address::Accumulator => self.accumulator = value,
+            _                    => self.memory.write(address, value),
+        }
     }
 
     ///  the sign and zero flags
@@ -648,8 +661,11 @@ impl<M> Cpu<M> where M: Memory {
     /// Move each of the bits in either A or M one place to the
     /// left. Bit 0 is filled with the current value of the carry flag
     /// whilst the old bit 7 becomes the new carry flag value.
-    fn rol(&mut self, _: &Address) {
-        unimplemented!()
+    fn rol(&mut self, address: &Address) {
+        let value = self.load(address);
+        let new_value = (value << 1) | (self.flags.carry as Word);
+        self.flags.carry = is!(value & 0b010000000);
+        self.store(address, new_value);
     }
 
     /// ROR - Rotate Right
@@ -657,8 +673,11 @@ impl<M> Cpu<M> where M: Memory {
     /// Move each of the bits in either A or M one place to the
     /// right. Bit 7 is filled with the current value of the carry
     /// flag whilst the old bit 0 becomes the new carry flag value.
-    fn ror(&mut self, _: &Address) {
-        unimplemented!()
+    fn ror(&mut self, address: &Address) {
+        let value = self.load(address);
+        let new_value = (value >> 1) | ((self.flags.carry as Word) << 7);
+        self.flags.carry = is!(value & 0b000000001);
+        self.store(address, new_value);
     }
 
     /// RTI - Return from Interrupt

@@ -113,3 +113,17 @@ mod test_and {
         assert_eq!(cpu.accumulator, 0b01000100);
     }
 }
+
+
+#[cfg(test)]
+mod test_rol {
+    use super::*;
+
+    #[test]
+    fn test_rol() {
+        let mut cpu: Cpu<LinearMemory> = Cpu::default();
+        cpu.accumulator = 0b10110010;
+        cpu.rol(&Address::Accumulator);
+        assert_eq!(cpu.accumulator, 0b01100100);
+    }
+}
