@@ -34,7 +34,7 @@ pub struct Clock {
     rate: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Address {
     /// A full 16-bit address is specified and the byte at that
     /// address is used to perform the computation. (e.g. LDX)

@@ -4,10 +4,10 @@ use ::tests::*;
 
 #[cfg(test)]
 fn simple_cpu(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
-    let mut cpu: Cpu<LinearMemory> = Cpu::default();
-    cpu.accumulator = accumulator;
-    cpu.memory.inner[0] = mem;
-    cpu
+    CpuBuilder::default()
+        .accumulator(accumulator)
+        .store(&Address::Absolute(0), mem)
+        .build()
 }
 
 
@@ -16,7 +16,10 @@ mod test_adc {
     use super::*;
 
     fn adc(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
-        let mut cpu = simple_cpu(accumulator, mem);
+        let mut cpu = CpuBuilder::default().
+            accumulator(accumulator).
+            store(&Address::Absolute(0), mem).
+            build();
         cpu.adc(&Address::Absolute(0));
         cpu
     }
@@ -102,7 +105,10 @@ mod test_and {
     use super::*;
 
     fn and(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
-        let mut cpu = simple_cpu(accumulator, mem);
+        let mut cpu = CpuBuilder::default()
+            .accumulator(accumulator)
+            .store(&Address::Absolute(0), mem)
+            .build();
         cpu.and(&Address::Absolute(0));
         cpu
     }
@@ -121,8 +127,7 @@ mod test_rol {
 
     #[test]
     fn test_rol() {
-        let mut cpu: Cpu<LinearMemory> = Cpu::default();
-        cpu.accumulator = 0b10110010;
+        let mut cpu = CpuBuilder::default().accumulator(0b10110010).build();
         cpu.rol(&Address::Accumulator);
         assert_eq!(cpu.accumulator, 0b01100100);
     }
