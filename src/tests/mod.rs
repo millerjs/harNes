@@ -1,50 +1,31 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
 use ::*;
+use ::types::*;
+use ::memory::*;
 pub mod cpu;
-
-struct LinearMemory {
-    inner: Vec<Word>,
-}
-
-impl Default for LinearMemory {
-    fn default() -> LinearMemory {
-        LinearMemory { inner: vec![0; MOS_6502_MEMORY_SIZE] }
-    }
-}
-
-impl Memory for LinearMemory {
-    fn read(&self, address: &Address) -> Word {
-        match *address {
-            Address::Absolute(address) => self.inner[address as usize],
-            _ => 0
-        }
-    }
-
-    fn write(&mut self, address: &Address, value: Word) {
-        match *address {
-            Address::Absolute(address) => self.inner[address as usize] = value,
-            _ => (),
-        }
-    }
-}
 
 #[derive(Default)]
 pub struct CpuBuilder {
-    cpu: Cpu<LinearMemory>,
+    cpu: Cpu<MappedMemory>,
 }
 
 impl CpuBuilder {
-    fn accumulator(mut self, value: Word) -> CpuBuilder {
+    fn accumulator(mut self, value: Byte) -> CpuBuilder {
         self.cpu.store(&Address::Accumulator, value);
         self
     }
 
-    fn build(self) -> Cpu<LinearMemory> {
+    fn carry(mut self, value: bool) -> CpuBuilder {
+        self.cpu.flags.carry = true;
+        self
+    }
+
+    fn build(self) -> Cpu<MappedMemory> {
         self.cpu
     }
 
-    fn store(mut self, address: &Address, value: Word) -> CpuBuilder {
+    fn store(mut self, address: &Address, value: Byte) -> CpuBuilder {
         self.cpu.store(address, value);
         self
     }

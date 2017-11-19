@@ -3,7 +3,7 @@ use ::tests::*;
 
 
 #[cfg(test)]
-fn simple_cpu(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
+fn simple_cpu(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
     CpuBuilder::default()
         .accumulator(accumulator)
         .store(&Address::Absolute(0), mem)
@@ -15,7 +15,7 @@ fn simple_cpu(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
 mod test_adc {
     use super::*;
 
-    fn adc(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
+    fn adc(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
         let mut cpu = CpuBuilder::default().
             accumulator(accumulator).
             store(&Address::Absolute(0), mem).
@@ -69,7 +69,7 @@ mod test_update_flags {
     use super::*;
     #[test]
     fn test_negative_negative() {
-        let mut cpu: Cpu<LinearMemory> = Cpu::default();
+        let mut cpu: Cpu<MappedMemory> = Cpu::default();
         cpu.accumulator = 0b11111111;
         cpu.update_flags();
         assert_eq!(cpu.flags.negative, true);
@@ -77,7 +77,7 @@ mod test_update_flags {
 
     #[test]
     fn test_negative_positive() {
-        let mut cpu: Cpu<LinearMemory> = Cpu::default();
+        let mut cpu: Cpu<MappedMemory> = Cpu::default();
         cpu.accumulator = 0b01111111;
         cpu.update_flags();
         assert_eq!(cpu.flags.negative, false);
@@ -85,7 +85,7 @@ mod test_update_flags {
 
     #[test]
     fn test_zero_zero() {
-        let mut cpu: Cpu<LinearMemory> = Cpu::default();
+        let mut cpu: Cpu<MappedMemory> = Cpu::default();
         cpu.accumulator = 0b00000000;
         cpu.update_flags();
         assert_eq!(cpu.flags.zero, true);
@@ -93,7 +93,7 @@ mod test_update_flags {
 
     #[test]
     fn test_zero_nonzero() {
-        let mut cpu: Cpu<LinearMemory> = Cpu::default();
+        let mut cpu: Cpu<MappedMemory> = Cpu::default();
         cpu.accumulator = 0b00000001;
         cpu.update_flags();
         assert_eq!(cpu.flags.zero, false);
@@ -104,7 +104,7 @@ mod test_update_flags {
 mod test_and {
     use super::*;
 
-    fn and(accumulator: Word, mem: Word) -> Cpu<LinearMemory> {
+    fn and(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
         let mut cpu = CpuBuilder::default()
             .accumulator(accumulator)
             .store(&Address::Absolute(0), mem)
@@ -130,5 +130,32 @@ mod test_rol {
         let mut cpu = CpuBuilder::default().accumulator(0b10110010).build();
         cpu.rol(&Address::Accumulator);
         assert_eq!(cpu.accumulator, 0b01100100);
+    }
+
+    #[test]
+    fn test_rol_carry() {
+        let mut cpu = CpuBuilder::default().accumulator(0b10110010).carry(true).build();
+        cpu.rol(&Address::Accumulator);
+        assert_eq!(cpu.accumulator, 0b01100101);
+    }
+}
+
+
+#[cfg(test)]
+mod test_ror {
+    use super::*;
+
+    #[test]
+    fn test_ror() {
+        let mut cpu = CpuBuilder::default().accumulator(0b10110010).build();
+        cpu.ror(&Address::Accumulator);
+        assert_eq!(cpu.accumulator, 0b01011001);
+    }
+
+    #[test]
+    fn test_ror_carry() {
+        let mut cpu = CpuBuilder::default().accumulator(0b10110010).carry(true).build();
+        cpu.ror(&Address::Accumulator);
+        assert_eq!(cpu.accumulator, 0b11011001);
     }
 }
