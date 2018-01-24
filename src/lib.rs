@@ -9,7 +9,7 @@ pub mod cpu;
 pub mod memory;
 pub mod address;
 pub mod types;
-pub mod rom;
+pub mod cartridge;
 
 use cpu::*;
 use types::*;
