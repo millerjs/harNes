@@ -6,3 +6,4 @@ authors = ["Joshua Miller <jsmiller@uchicago.edu>"]
 [dependencies]
 lazy_static = "0.2"
 quick-error = "*"
+clap = "1.5.5"
