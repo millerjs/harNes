@@ -1,4 +1,5 @@
 use ::types::*;
+use ::cpu::Cpu;
 
 #[derive(Default)]
 pub struct Flags {
@@ -35,5 +36,20 @@ impl Flags {
             overflow:          is!(byte & 0b00100000),
             negative:          is!(byte & 0b10000000),
         }
+    }
+}
+
+impl Cpu {
+    /// Update the sign and zero flags via accumulator
+    #[inline(always)]
+    pub fn update_flags(&mut self) {
+        let value = self.accumulator;
+        self.update_flags_with(value);
+    }
+
+    /// Update the sign and zero flags via `value`
+    pub fn update_flags_with(&mut self, value: Byte) {
+        self.flags.zero = value == 0;
+        self.flags.negative = is!(value & 0b10000000);
     }
 }

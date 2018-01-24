@@ -62,6 +62,32 @@ pub trait InstructionSet {
 use cpu::{Cpu, Flags};
 use ::stack::*;
 
+impl Cpu {
+    /// Increments the program and returns the previous value
+    #[inline(always)]
+    pub fn compare<T: Ord>(&mut self, a: T, b: T) {
+        self.flags.zero     = a.eq(&b);
+        self.flags.negative = a.gt(&b);
+    }
+
+
+    /// All branches are relative mode and have a length of two
+    /// bytes
+    ///
+    /// A branch not taken requires two machine cycles. Add one if the
+    /// branch is taken and add one more if the branch crosses a page
+    /// boundary.
+    #[inline(always)]
+    pub fn branch(&mut self, condition: bool) {
+        let address = self.increment_program_counter();
+        let delta = self.load(&Address::Absolute(address)) as i8;
+        if condition {
+            self.program_counter = (self.program_counter as i32 + delta as i32) as Word;
+        }
+    }
+}
+
+
 impl InstructionSet for Cpu {
     /// ADC - Add with Carry
     ///
