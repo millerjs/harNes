@@ -16,7 +16,7 @@ quick_error! {
 pub type Flags = Byte;
 
 #[repr(C, packed)]
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Header {
     /// Constant $4E $45 $53 $1A ("NES" followed by MS-DOS end-of-file)
     constant: [Byte; 4],
@@ -56,6 +56,7 @@ pub struct Header {
     zero_filled: [Byte; 5]
 }
 
+#[derive(Default)]
 pub struct Cartridge {
     header: Header,
     program_rom: Vec<Byte>,
@@ -98,13 +99,14 @@ impl Cartridge {
         source.read_exact(&mut program_rom)?;
         source.read_exact(&mut character_rom)?;
 
-        let rom = Cartridge {
+        let cartridge = Cartridge {
             header: header,
             program_rom,
             character_rom
         };
 
-        Ok(rom)
+        info!("Loaded iNES cartridge {}", cartridge);
+        Ok(cartridge)
     }
 
     pub fn load_file<P: AsRef<Path>>(path: &P) -> Result<Cartridge, CartridgeError> {

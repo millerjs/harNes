@@ -7,7 +7,7 @@ pub mod cpu;
 
 #[derive(Default)]
 pub struct CpuBuilder {
-    cpu: Cpu<MappedMemory>,
+    cpu: Cpu,
 }
 
 impl CpuBuilder {
@@ -21,7 +21,7 @@ impl CpuBuilder {
         self
     }
 
-    fn build(self) -> Cpu<MappedMemory> {
+    fn build(self) -> Cpu {
         self.cpu
     }
 

@@ -1,5 +1,6 @@
 use address::*;
 use types::*;
+use cartridge::Cartridge;
 
 pub const MEMORY_SIZE: usize = 65536;
 pub const RAM_SIZE: usize = 2048;
@@ -31,6 +32,14 @@ impl Memory for Ram {
 #[derive(Default)]
 pub struct MappedMemory {
     ram: Ram,
+    cartridge: Cartridge,
+}
+
+impl MappedMemory {
+    pub fn cartridge(mut self, cartridge: Cartridge) -> Self {
+        self.cartridge = cartridge;
+        self
+    }
 }
 
 impl Memory for MappedMemory {

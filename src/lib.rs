@@ -1,9 +1,8 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
-#[macro_use]
-extern crate quick_error;
-#[macro_use]
-extern crate lazy_static;
+#[macro_use] extern crate quick_error;
+#[macro_use] extern crate lazy_static;
+#[macro_use] extern crate log;
 
 pub mod cpu;
 pub mod memory;

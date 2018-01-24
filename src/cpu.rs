@@ -5,8 +5,8 @@ use ::memory::*;
 pub const STACK_OFFSET: Word = 256;
 
 #[derive(Default)]
-pub struct Cpu<M> {
-    pub memory: Box<M>,
+pub struct Cpu {
+    pub memory: MappedMemory,
     pub cycles: usize,
     pub program_counter: Word,
     pub stack_pointer: Byte,
@@ -91,7 +91,12 @@ impl Flags {
     }
 }
 
-impl<M> Cpu<M> where M: Memory {
+impl Cpu {
+    pub fn memory(mut self, memory: MappedMemory) -> Self {
+        self.memory = memory;
+        self
+    }
+
     /// Delegates loading of address in memory or loads from register
     #[inline(always)]
     pub fn load(&self, address: &Address) -> Byte {

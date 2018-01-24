@@ -3,7 +3,7 @@ use ::tests::*;
 
 
 #[cfg(test)]
-fn simple_cpu(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
+fn simple_cpu(accumulator: Byte, mem: Byte) -> Cpu {
     CpuBuilder::default()
         .accumulator(accumulator)
         .store(&Address::Absolute(0), mem)
@@ -15,7 +15,7 @@ fn simple_cpu(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
 mod test_adc {
     use super::*;
 
-    fn adc(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
+    fn adc(accumulator: Byte, mem: Byte) -> Cpu {
         let mut cpu = CpuBuilder::default().
             accumulator(accumulator).
             store(&Address::Absolute(0), mem).
@@ -69,7 +69,7 @@ mod test_update_flags {
     use super::*;
     #[test]
     fn test_negative_negative() {
-        let mut cpu: Cpu<MappedMemory> = Cpu::default();
+        let mut cpu: Cpu = Cpu::default();
         cpu.accumulator = 0b11111111;
         cpu.update_flags();
         assert_eq!(cpu.flags.negative, true);
@@ -77,7 +77,7 @@ mod test_update_flags {
 
     #[test]
     fn test_negative_positive() {
-        let mut cpu: Cpu<MappedMemory> = Cpu::default();
+        let mut cpu: Cpu = Cpu::default();
         cpu.accumulator = 0b01111111;
         cpu.update_flags();
         assert_eq!(cpu.flags.negative, false);
@@ -85,7 +85,7 @@ mod test_update_flags {
 
     #[test]
     fn test_zero_zero() {
-        let mut cpu: Cpu<MappedMemory> = Cpu::default();
+        let mut cpu: Cpu = Cpu::default();
         cpu.accumulator = 0b00000000;
         cpu.update_flags();
         assert_eq!(cpu.flags.zero, true);
@@ -93,7 +93,7 @@ mod test_update_flags {
 
     #[test]
     fn test_zero_nonzero() {
-        let mut cpu: Cpu<MappedMemory> = Cpu::default();
+        let mut cpu: Cpu = Cpu::default();
         cpu.accumulator = 0b00000001;
         cpu.update_flags();
         assert_eq!(cpu.flags.zero, false);
@@ -104,7 +104,7 @@ mod test_update_flags {
 mod test_and {
     use super::*;
 
-    fn and(accumulator: Byte, mem: Byte) -> Cpu<MappedMemory> {
+    fn and(accumulator: Byte, mem: Byte) -> Cpu {
         let mut cpu = CpuBuilder::default()
             .accumulator(accumulator)
             .store(&Address::Absolute(0), mem)

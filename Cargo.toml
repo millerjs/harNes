@@ -7,3 +7,5 @@ authors = ["Joshua Miller <jsmiller@uchicago.edu>"]
 lazy_static = "0.2"
 quick-error = "*"
 clap = "1.5.5"
+log = "0.4"
+env_logger = "*"
