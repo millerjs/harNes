@@ -18,8 +18,9 @@ fn main() {
              .required(true))
         .get_matches();
 
-    let path = matches.value_of("PATH").unwrap();
-    let cartridge = Cartridge::load_file(&path).unwrap();
-    let memory = MappedMemory::default().cartridge(cartridge);
-    let cpu = Cpu::default().memory(memory);
+    let path       = matches.value_of("PATH").unwrap();
+    let cartridge  = Cartridge::load_file(&path).unwrap();
+    let memory     = MappedMemory::default().cartridge(cartridge);
+    let cpu        = Cpu::default().memory(memory);
+    cpu.run();
 }
