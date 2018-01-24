@@ -2,6 +2,7 @@ pub mod flags;
 pub mod instruction;
 pub mod instruction_set;
 pub mod stack;
+pub mod interrupt;
 
 use ::flags::*;
 use ::stack::*;
@@ -9,6 +10,8 @@ use ::types::*;
 use ::address::*;
 use ::memory::*;
 use ::instruction::Instruction;
+
+pub use ::instruction_set::InstructionSet;
 
 #[derive(Default)]
 pub struct Cpu {
@@ -22,12 +25,6 @@ pub struct Cpu {
     pub interrupt: Byte,
     pub stall: usize,
     pub flags: Flags,
-}
-
-pub enum Interrupt {
-    None,
-    NMI,
-    IRQ,
 }
 
 
