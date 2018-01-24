@@ -158,13 +158,14 @@ impl<M> Cpu<M> where M: Memory {
         }
     }
 
-    /// Update the sign and zero flags
+    /// Update the sign and zero flags via accumulator
     #[inline(always)]
     pub fn update_flags(&mut self) {
         let value = self.accumulator;
         self.update_flags_with(value);
     }
 
+    /// Update the sign and zero flags via `value`
     pub fn update_flags_with(&mut self, value: Byte) {
         self.flags.zero = value == 0;
         self.flags.negative = is!(value & 0b10000000);
@@ -465,6 +466,9 @@ impl<M> Cpu<M> where M: Memory {
     /// return point on to the stack and then sets the program counter
     /// to the target memory address.
     pub fn jsr(&mut self, address: &Address) {
+        let return_point = self.program_counter - 1;
+        self.push_word(return_point);
+        self.program_counter = self.load_word(address)
     }
 
     /// LDA - Load Accumulator
