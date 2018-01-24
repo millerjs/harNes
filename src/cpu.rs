@@ -2,6 +2,8 @@ use ::types::*;
 use ::address::*;
 use ::memory::*;
 
+pub const STACK_OFFSET: Word = 256;
+
 #[derive(Default)]
 pub struct Cpu<M> {
     pub memory: Box<M>,
@@ -100,6 +102,13 @@ impl<M> Cpu<M> where M: Memory {
                 self.memory.read(computed)
             },
         }
+    }
+
+    /// Delegates loading of word from address in memory
+    #[inline(always)]
+    pub fn load_word(&self, address: &Address) -> Word {
+        let computed = self.compute_address(address);
+        Word::from_bytes(self.memory.read(computed), self.memory.read(computed + 1))
     }
 
     /// Delegates writing of value to address in memory or writes to
@@ -308,7 +317,7 @@ impl<M> Cpu<M> where M: Memory {
     /// loaded into the PC and the break flag in the status set to
     /// one.
     pub fn brk(&mut self, _: &Address) {
-        unimplemented!()
+        // TODO
     }
 
     /// BVC - Branch if Overflow Clear
@@ -414,12 +423,12 @@ impl<M> Cpu<M> where M: Memory {
     /// An exclusive OR is performed, bit by bit, on the accumulator
     /// contents using the contents of a byte of memory.
     pub fn eor(&mut self, _: &Address) {
-        unimplemented!()
+        // TODO
     }
 
     /// INC - Increment Memory
     ///
-    /// Adds one to the value held at a specified memory location
+    /// adds one to the value held at a specified memory location
     /// setting the zero and negative flags as appropriate.
     pub fn inc(&mut self, address: &Address) {
         let result = increment!(self, self.load(address), 1);
@@ -447,6 +456,7 @@ impl<M> Cpu<M> where M: Memory {
     /// Sets the program counter to the address specified by the
     /// operand.
     pub fn jmp(&mut self, address: &Address) {
+        self.program_counter = self.load_word(address);
     }
 
     /// JSR - Jump to Subroutine
@@ -454,8 +464,7 @@ impl<M> Cpu<M> where M: Memory {
     /// The JSR instruction pushes the address (minus one) of the
     /// return point on to the stack and then sets the program counter
     /// to the target memory address.
-    pub fn jsr(&mut self, _: &Address) {
-        unimplemented!()
+    pub fn jsr(&mut self, address: &Address) {
     }
 
     /// LDA - Load Accumulator
@@ -515,15 +524,26 @@ impl<M> Cpu<M> where M: Memory {
     }
 
     pub fn push(&mut self, value: Byte) {
-        let address = &Address::Absolute(0x100 + (self.stack_pointer as Word));
+        let address = STACK_OFFSET + (self.stack_pointer as Word);
         self.stack_pointer -= 1;
-        self.store(address, value);
+        self.memory.write(address, value);
     }
 
     pub fn pop(&mut self) -> Byte {
         self.stack_pointer += 1;
-        let address = &Address::Absolute(0x100 + (self.stack_pointer as Word));
-        self.load(address)
+        let address = STACK_OFFSET + (self.stack_pointer as Word);
+        self.memory.read(address)
+    }
+
+    pub fn push_word(&mut self, value: Word) {
+        let (little, big) = value.as_bytes();
+        self.push(little);
+        self.push(big);
+    }
+
+    pub fn pop_word(&mut self, value: Word) -> Word {
+        let (little, big) = (self.pop(), self.pop());
+        Word::from_bytes(little, big)
     }
 
     /// PHA - Push Accumulator
@@ -591,7 +611,7 @@ impl<M> Cpu<M> where M: Memory {
     /// processing routine. It pulls the processor flags from the
     /// stack followed by the program counter.
     pub fn rti(&mut self, _: &Address) {
-        unimplemented!()
+        // TODO
     }
 
     /// RTS - Return from Subroutine
@@ -600,7 +620,7 @@ impl<M> Cpu<M> where M: Memory {
     /// return to the calling routine. It pulls the program counter
     /// (minus one) from the stack.
     pub fn rts(&mut self, _: &Address) {
-        unimplemented!()
+        // TODO
     }
 
     /// SBC - Subtract with Carry

@@ -1,12 +1,12 @@
 use address::*;
 use types::*;
 
-pub const MOS_6502_MEMORY_SIZE: usize = 65536;
-pub const MOS_6502_RAM_SIZE: usize = 2048;
+pub const MEMORY_SIZE: usize = 65536;
+pub const RAM_SIZE: usize = 2048;
 
 impl Default for Ram {
     fn default() -> Ram {
-        Ram { bytes: vec![0; MOS_6502_RAM_SIZE] }
+        Ram { bytes: vec![0; RAM_SIZE] }
     }
 }
 
