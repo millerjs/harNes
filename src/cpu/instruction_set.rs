@@ -1,5 +1,6 @@
 use address::Address;
 use types::*;
+use ::instruction::Instruction;
 
 pub trait InstructionSet {
     fn adc(&mut self, _: &Address);
@@ -55,8 +56,10 @@ pub trait InstructionSet {
     fn tax(&mut self, _: &Address);
     fn tay(&mut self, _: &Address);
     fn tsx(&mut self, _: &Address);
+    fn txs(&mut self, _: &Address);
     fn txa(&mut self, _: &Address);
     fn tya(&mut self, _: &Address);
+    fn execute_instruction(&mut self, instruction: &Instruction);
 }
 
 use cpu::{Cpu, Flags};
@@ -581,13 +584,22 @@ impl InstructionSet for Cpu {
         self.update_flags_with(value);
     }
 
+    /// TXS - Transfer X to Stack Pointer
+    ///
+    /// Copies the current contents of the X register into the stack pointer
+    /// register and sets the zero and negative flags as appropriate.
+    fn txs(&mut self, _: &Address) {
+        let value = self.register_x;
+        self.stack_pointer = value;
+        self.update_flags_with(value);
+    }
+
     /// TXA - Transfer X to Accumulator
     ///
     /// Copies the current contents of the X register into the
     /// accumulator and sets the zero and negative flags as
     /// appropriate.
     fn txa(&mut self, _: &Address) {
-        let value = self.register_x;
         self.accumulator = self.register_x;
         self.update_flags();
     }
@@ -599,5 +611,68 @@ impl InstructionSet for Cpu {
     fn tya(&mut self, _: &Address) {
         let value = self.register_x;
         self.stack_pointer = self.register_x;
+    }
+
+    /// Executes provided instruction
+    fn execute_instruction(&mut self, instruction: &Instruction) {
+        match *instruction {
+            Instruction::ADC(ref address) => self.adc(address),
+            Instruction::AND(ref address) => self.and(address),
+            Instruction::ASL(ref address) => self.asl(address),
+            Instruction::BCC(ref address) => self.bcc(address),
+            Instruction::BCS(ref address) => self.bcs(address),
+            Instruction::BEQ(ref address) => self.beq(address),
+            Instruction::BIT(ref address) => self.bit(address),
+            Instruction::BMI(ref address) => self.bmi(address),
+            Instruction::BNE(ref address) => self.bne(address),
+            Instruction::BPL(ref address) => self.bpl(address),
+            Instruction::BRK(ref address) => self.brk(address),
+            Instruction::BVC(ref address) => self.bvc(address),
+            Instruction::BVS(ref address) => self.bvs(address),
+            Instruction::CLC(ref address) => self.clc(address),
+            Instruction::CLD(ref address) => self.cld(address),
+            Instruction::CLI(ref address) => self.cli(address),
+            Instruction::CLV(ref address) => self.clv(address),
+            Instruction::CMP(ref address) => self.cmp(address),
+            Instruction::CPX(ref address) => self.cpx(address),
+            Instruction::CPY(ref address) => self.cpy(address),
+            Instruction::DEC(ref address) => self.dec(address),
+            Instruction::DEX(ref address) => self.dex(address),
+            Instruction::DEY(ref address) => self.dey(address),
+            Instruction::EOR(ref address) => self.eor(address),
+            Instruction::INC(ref address) => self.inc(address),
+            Instruction::INX(ref address) => self.inx(address),
+            Instruction::INY(ref address) => self.iny(address),
+            Instruction::JMP(ref address) => self.jmp(address),
+            Instruction::JSR(ref address) => self.jsr(address),
+            Instruction::LDA(ref address) => self.lda(address),
+            Instruction::LDX(ref address) => self.ldx(address),
+            Instruction::LDY(ref address) => self.ldy(address),
+            Instruction::LSR(ref address) => self.lsr(address),
+            Instruction::NOP(ref address) => self.nop(address),
+            Instruction::ORA(ref address) => self.ora(address),
+            Instruction::PHA(ref address) => self.pha(address),
+            Instruction::PHP(ref address) => self.php(address),
+            Instruction::PLA(ref address) => self.pla(address),
+            Instruction::PLP(ref address) => self.plp(address),
+            Instruction::ROL(ref address) => self.rol(address),
+            Instruction::ROR(ref address) => self.ror(address),
+            Instruction::RTI(ref address) => self.rti(address),
+            Instruction::RTS(ref address) => self.rts(address),
+            Instruction::SBC(ref address) => self.sbc(address),
+            Instruction::SEC(ref address) => self.sec(address),
+            Instruction::SED(ref address) => self.sed(address),
+            Instruction::SEI(ref address) => self.sei(address),
+            Instruction::STA(ref address) => self.sta(address),
+            Instruction::STX(ref address) => self.stx(address),
+            Instruction::STY(ref address) => self.sty(address),
+            Instruction::TAX(ref address) => self.tax(address),
+            Instruction::TAY(ref address) => self.tay(address),
+            Instruction::TSX(ref address) => self.tsx(address),
+            Instruction::TXA(ref address) => self.txa(address),
+            Instruction::TXS(ref address) => self.txs(address),
+            Instruction::TYA(ref address) => self.tya(address),
+        }
+
     }
 }

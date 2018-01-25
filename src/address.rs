@@ -91,22 +91,22 @@ pub enum Address {
     ZeroPageY(Byte),
 }
 
-pub enum AddressMapping {
-    Ram,
-    Ppu,
-    Input,
-    Apu,
-    Mapper,
-}
-
-impl AddressMapping {
-    pub fn from_word(word: Word) -> AddressMapping {
-        match word {
-            word if word <= 0x1FFF => AddressMapping::Ram,
-            word if word <= 0x3FFF => AddressMapping::Ppu,
-            word if word == 0x4016 => AddressMapping::Input,
-            word if word <= 0x4018 => AddressMapping::Apu,
-                                 _ => AddressMapping::Apu
+impl Address {
+    pub fn length(&self) -> usize {
+        match *self {
+            Address::Absolute(_)         => 1,
+            Address::AbsoluteIndexedX(_) => 3,
+            Address::AbsoluteIndexedY(_) => 3,
+            Address::Accumulator         => 1,
+            Address::Immediate(_)        => 2,
+            Address::Implicit            => 1,
+            Address::Indirect(_)         => 3,
+            Address::IndirectIndexed(_)  => 2,
+            Address::IndexedIndirect(_)  => 2,
+            Address::Relative(_)         => 2,
+            Address::ZeroPage(_)         => 2,
+            Address::ZeroPageX(_)        => 2,
+            Address::ZeroPageY(_)        => 2,
         }
     }
 }

@@ -72,7 +72,6 @@ impl Instruction {
         let opcode = program[0];
 
         match opcode {
-
             // ADC
             0x69 => Instruction::ADC (Address::Immediate        (byte (program))),
             0x65 => Instruction::ADC (Address::ZeroPage         (byte (program))),
@@ -267,6 +266,67 @@ impl Instruction {
             0x8C => Instruction::STY (Address::Absolute         (word (program))),
 
             _    => unreachable!(),
+        }
+    }
+
+    pub fn length(&self) -> usize {
+        match *self {
+            Instruction::ADC(ref address) => address.length(),
+            Instruction::AND(ref address) => address.length(),
+            Instruction::ASL(ref address) => address.length(),
+            Instruction::BCC(ref address) => address.length(),
+            Instruction::BCS(ref address) => address.length(),
+            Instruction::BEQ(ref address) => address.length(),
+            Instruction::BIT(ref address) => address.length(),
+            Instruction::BMI(ref address) => address.length(),
+            Instruction::BNE(ref address) => address.length(),
+            Instruction::BPL(ref address) => address.length(),
+            Instruction::BRK(ref address) => address.length(),
+            Instruction::BVC(ref address) => address.length(),
+            Instruction::BVS(ref address) => address.length(),
+            Instruction::CLC(ref address) => address.length(),
+            Instruction::CLD(ref address) => address.length(),
+            Instruction::CLI(ref address) => address.length(),
+            Instruction::CLV(ref address) => address.length(),
+            Instruction::CMP(ref address) => address.length(),
+            Instruction::CPX(ref address) => address.length(),
+            Instruction::CPY(ref address) => address.length(),
+            Instruction::DEC(ref address) => address.length(),
+            Instruction::DEX(ref address) => address.length(),
+            Instruction::DEY(ref address) => address.length(),
+            Instruction::EOR(ref address) => address.length(),
+            Instruction::INC(ref address) => address.length(),
+            Instruction::INX(ref address) => address.length(),
+            Instruction::INY(ref address) => address.length(),
+            Instruction::JMP(ref address) => address.length(),
+            Instruction::JSR(ref address) => address.length(),
+            Instruction::LDA(ref address) => address.length(),
+            Instruction::LDX(ref address) => address.length(),
+            Instruction::LDY(ref address) => address.length(),
+            Instruction::LSR(ref address) => address.length(),
+            Instruction::NOP(ref address) => address.length(),
+            Instruction::ORA(ref address) => address.length(),
+            Instruction::PHA(ref address) => address.length(),
+            Instruction::PHP(ref address) => address.length(),
+            Instruction::PLA(ref address) => address.length(),
+            Instruction::PLP(ref address) => address.length(),
+            Instruction::ROL(ref address) => address.length(),
+            Instruction::ROR(ref address) => address.length(),
+            Instruction::RTI(ref address) => address.length(),
+            Instruction::RTS(ref address) => address.length(),
+            Instruction::SBC(ref address) => address.length(),
+            Instruction::SEC(ref address) => address.length(),
+            Instruction::SED(ref address) => address.length(),
+            Instruction::SEI(ref address) => address.length(),
+            Instruction::STA(ref address) => address.length(),
+            Instruction::STX(ref address) => address.length(),
+            Instruction::STY(ref address) => address.length(),
+            Instruction::TAX(ref address) => address.length(),
+            Instruction::TAY(ref address) => address.length(),
+            Instruction::TSX(ref address) => address.length(),
+            Instruction::TXA(ref address) => address.length(),
+            Instruction::TXS(ref address) => address.length(),
+            Instruction::TYA(ref address) => address.length(),
         }
     }
 }

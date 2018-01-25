@@ -34,14 +34,13 @@ impl Cpu {
     }
 
     pub fn run(mut self) {
+        self.step();
     }
 
     fn step(&mut self) {
-        let op_address = self.program_counter;
-        self.program_counter += 1;
-
-        // TODO update cycles
-        self.cycles += 1
+        let program_counter = self.program_counter;
+        let instruction = Instruction::from_byte_code(self.memory.slice(program_counter));
+        self.cycles += instruction.length();
     }
 
     /// Increments the program and returns the previous value
