@@ -9,12 +9,12 @@ pub enum Address {
     /// The value in X is added to the specified address for a sum
     /// address. The value at the sum address is used to perform the
     /// computation. (e.g. ADC)
-    AbsoluteIndexedX(Byte),
+    AbsoluteIndexedX(Word),
 
     /// The value in X is added to the specified address for a sum
     /// address. The value at the sum address is used to perform the
     /// computation. (e.g. INC)
-    AbsoluteIndexedY(Byte),
+    AbsoluteIndexedY(Word),
 
     /// The Accumulator is implied as the operand, so no address needs
     /// to be specified. (e.g. ASL)

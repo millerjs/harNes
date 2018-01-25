@@ -1,5 +1,4 @@
 pub mod flags;
-pub mod instruction;
 pub mod instruction_set;
 pub mod stack;
 pub mod interrupt;

@@ -11,6 +11,7 @@ pub mod memory;
 pub mod address;
 pub mod types;
 pub mod cartridge;
+pub mod instruction;
 
 use cpu::*;
 use types::*;
