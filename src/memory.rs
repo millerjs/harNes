@@ -1,17 +1,12 @@
 use address::*;
 use types::*;
 use cartridge::Cartridge;
+use mappers;
 
 pub const MEMORY_SIZE: usize = 65536;
 pub const RAM_SIZE: usize = 2048;
 
-impl Default for Ram {
-    fn default() -> Ram {
-        Ram { bytes: vec![0; RAM_SIZE] }
-    }
-}
-
-pub trait Memory: Default {
+pub trait Memory {
     fn read(&self, address: Word) -> Byte;
     fn write(&mut self, address: Word, value: Byte);
 }
@@ -29,15 +24,23 @@ impl Memory for Ram {
     }
 }
 
-#[derive(Default)]
 pub struct MappedMemory {
     ram: Ram,
-    cartridge: Cartridge,
+    mapper: Box<mappers::Mapper>,
 }
 
+impl Default for MappedMemory {
+    fn default() -> MappedMemory {
+        let ram = Ram { bytes: vec![0; RAM_SIZE] };
+        let mapper = Box::new(mappers::empty::Empty {});
+        MappedMemory { ram, mapper }
+    }
+}
+
+
 impl MappedMemory {
-    pub fn cartridge(mut self, cartridge: Cartridge) -> Self {
-        self.cartridge = cartridge;
+    pub fn insert_cartridge(mut self, cartridge: Cartridge) -> Self {
+        self.mapper = mappers::from_cartridge(cartridge);
         self
     }
 }
@@ -57,7 +60,7 @@ impl AddressMapping {
             word if word <= 0x3FFF => AddressMapping::Ppu,
             word if word == 0x4016 => AddressMapping::Input,
             word if word <= 0x4018 => AddressMapping::Apu,
-                                 _ => AddressMapping::Apu
+                                 _ => AddressMapping::Mapper
         }
     }
 }
@@ -69,7 +72,7 @@ impl Memory for MappedMemory {
             AddressMapping::Ppu    => unimplemented!(),
             AddressMapping::Input  => unimplemented!(),
             AddressMapping::Apu    => unimplemented!(),
-            AddressMapping::Mapper => unimplemented!(),
+            AddressMapping::Mapper => self.mapper.read(address),
         }
     }
     fn write(&mut self, address: Word, value: Byte) {
@@ -78,7 +81,7 @@ impl Memory for MappedMemory {
             AddressMapping::Ppu    => unimplemented!(),
             AddressMapping::Input  => unimplemented!(),
             AddressMapping::Apu    => unimplemented!(),
-            AddressMapping::Mapper => unimplemented!(),
+            AddressMapping::Mapper => self.mapper.write(address, value),
         }
     }
 }

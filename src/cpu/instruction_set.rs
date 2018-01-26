@@ -615,6 +615,7 @@ impl InstructionSet for Cpu {
 
     /// Executes provided instruction
     fn execute_instruction(&mut self, instruction: &Instruction) {
+        trace!("Executing instruction {:?}", instruction);
         match *instruction {
             Instruction::ADC(ref address) => self.adc(address),
             Instruction::AND(ref address) => self.and(address),
@@ -673,6 +674,6 @@ impl InstructionSet for Cpu {
             Instruction::TXS(ref address) => self.txs(address),
             Instruction::TYA(ref address) => self.tya(address),
         }
-
+        trace!("Executed instruction {:?}", instruction);
     }
 }

@@ -12,6 +12,7 @@ pub mod address;
 pub mod types;
 pub mod cartridge;
 pub mod instruction;
+pub mod mappers;
 
 use cpu::*;
 use types::*;

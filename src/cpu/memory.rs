@@ -41,6 +41,7 @@ impl Cpu {
     /// Delegates loading of address in memory or loads from register
     #[inline(always)]
     pub fn load(&self, address: &Address) -> Byte {
+        trace!("Loading byte from {:?}", address);
         match *address {
             Address::Accumulator => self.accumulator,
             _ => {
@@ -53,6 +54,7 @@ impl Cpu {
     /// Delegates loading of word from address in memory
     #[inline(always)]
     pub fn load_word(&self, address: &Address) -> Word {
+        trace!("Loading word from {:?}", address);
         let computed = self.compute_address(address);
         Word::from_bytes(self.memory.read(computed), self.memory.read(computed + 1))
     }
@@ -61,6 +63,7 @@ impl Cpu {
     /// register
     #[inline(always)]
     pub fn store(&mut self, address: &Address, value: Byte) {
+        trace!("Storing word {:} to {:?}", value, address);
         match *address {
             Address::Accumulator => self.accumulator = value,
             _ => {

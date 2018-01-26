@@ -1,6 +1,7 @@
 use address::Address;
 use types::*;
 
+#[derive(Debug)]
 pub enum Instruction {
     ADC(Address), // add with carry
     AND(Address), // and (with accumulator)
@@ -70,8 +71,9 @@ impl Instruction {
     pub fn from_byte_code(program: &[Byte]) -> Instruction {
         let size = 0;
         let opcode = program[0];
+        trace!("Parsing opcode {:?}", opcode);
 
-        match opcode {
+        let instruction = match opcode {
             // ADC
             0x69 => Instruction::ADC (Address::Immediate        (byte (program))),
             0x65 => Instruction::ADC (Address::ZeroPage         (byte (program))),
@@ -266,7 +268,9 @@ impl Instruction {
             0x8C => Instruction::STY (Address::Absolute         (word (program))),
 
             _    => unreachable!(),
-        }
+        };
+        trace!("Parsed opcode {:?} -> {:?}", opcode, instruction);
+        instruction
     }
 
     pub fn length(&self) -> usize {

@@ -34,6 +34,8 @@ impl Cpu {
     }
 
     pub fn run(mut self) {
+        info!("Starting NES!");
+        self.reset();
         self.step();
     }
 
@@ -41,6 +43,10 @@ impl Cpu {
         let program_counter = self.program_counter;
         let instruction = Instruction::from_byte_code(self.memory.slice(program_counter));
         self.cycles += instruction.length();
+    }
+
+    fn reset(&mut self) {
+        self.program_counter = self.load_word(&Address::Absolute(0xFFFC))
     }
 
     /// Increments the program and returns the previous value
