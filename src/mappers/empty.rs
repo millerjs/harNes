@@ -2,8 +2,16 @@ use ::types::*;
 use ::memory::Memory;
 use ::mappers::Mapper;
 
-pub struct Empty {}
-impl Mapper for Empty {}
+#[derive(Default)]
+pub struct Empty {
+    mem: Vec<Byte>
+}
+
+impl Mapper for Empty {
+    fn slice<'a>(&'a self, start: Word) -> &'a [Byte] {
+        &*self.mem
+    }
+}
 
 impl Memory for Empty {
     fn read(&self, address: Word) -> Byte {

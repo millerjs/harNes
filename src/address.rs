@@ -1,6 +1,6 @@
 use ::types::*;
+use std::fmt;
 
-#[derive(Clone, Debug)]
 pub enum Address {
     /// A full 16-bit address is specified and the byte at that
     /// address is used to perform the computation. (e.g. LDX)
@@ -107,6 +107,26 @@ impl Address {
             Address::ZeroPage(_)         => 2,
             Address::ZeroPageX(_)        => 2,
             Address::ZeroPageY(_)        => 2,
+        }
+    }
+}
+
+impl fmt::Debug for Address {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Address::Absolute(inner)         => write!(f, "Address::Absolute({:#x})", inner),
+            Address::AbsoluteIndexedX(inner) => write!(f, "Address::AbsoluteIndexedX({:#x})", inner),
+            Address::AbsoluteIndexedY(inner) => write!(f, "Address::AbsoluteIndexedY({:#x})", inner),
+            Address::Accumulator             => write!(f, "Address::Accumulator"),
+            Address::Immediate(inner)        => write!(f, "Address::Immediate({:#x})", inner),
+            Address::Implicit                => write!(f, "Address::Implicit"),
+            Address::Indirect(inner)         => write!(f, "Address::Indirect({:#x})", inner),
+            Address::IndirectIndexed(inner)  => write!(f, "Address::IndirectIndexed({:#x})", inner),
+            Address::IndexedIndirect(inner)  => write!(f, "Address::IndexedIndirect({:#x})", inner),
+            Address::Relative(inner)         => write!(f, "Address::Relative({:#x})", inner),
+            Address::ZeroPage(inner)         => write!(f, "Address::ZeroPage({:#x})", inner),
+            Address::ZeroPageX(inner)        => write!(f, "Address::ZeroPageX({:#x})", inner),
+            Address::ZeroPageY(inner)        => write!(f, "Address::ZeroPageY({:#x})", inner),
         }
     }
 }

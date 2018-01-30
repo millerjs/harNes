@@ -42,11 +42,13 @@ impl Cpu {
     fn step(&mut self) {
         let program_counter = self.program_counter;
         let instruction = Instruction::from_byte_code(self.memory.slice(program_counter));
+        trace!("Read instruction {:?}", instruction);
         self.cycles += instruction.length();
     }
 
     fn reset(&mut self) {
-        self.program_counter = self.load_word(&Address::Absolute(0xFFFC))
+        self.program_counter = self.load_word(&Address::Absolute(0xFFFC));
+        trace!("Reset program counter to {:#x}", self.program_counter);
     }
 
     /// Increments the program and returns the previous value

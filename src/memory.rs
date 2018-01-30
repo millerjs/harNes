@@ -32,7 +32,7 @@ pub struct MappedMemory {
 impl Default for MappedMemory {
     fn default() -> MappedMemory {
         let ram = Ram { bytes: vec![0; RAM_SIZE] };
-        let mapper = Box::new(mappers::empty::Empty {});
+        let mapper = Box::new(mappers::empty::Empty::default());
         MappedMemory { ram, mapper }
     }
 }
@@ -89,12 +89,13 @@ impl Memory for MappedMemory {
 
 impl MappedMemory {
     pub fn slice<'a>(&'a self, start: Word) -> &'a [Byte] {
+        trace!("Slicing MappedMemory at {:#x}", start);
         match AddressMapping::from_word(start) {
             AddressMapping::Ram    => &self.ram.bytes[start as usize..],
             AddressMapping::Ppu    => unimplemented!(),
             AddressMapping::Input  => unimplemented!(),
             AddressMapping::Apu    => unimplemented!(),
-            AddressMapping::Mapper => unimplemented!(),
+            AddressMapping::Mapper => self.mapper.slice(start),
         }
     }
 }

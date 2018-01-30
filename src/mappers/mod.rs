@@ -5,7 +5,9 @@ use ::types::*;
 use ::memory::*;
 use ::cartridge::Cartridge;
 
-pub trait Mapper: Memory {}
+pub trait Mapper: Memory {
+    fn slice<'a>(&'a self, start: Word) -> &'a [Byte];
+}
 
 pub fn from_cartridge(cartridge: Cartridge) -> Box<Mapper> {
     let mapper_code = cartridge.mapper_code();
