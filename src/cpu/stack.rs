@@ -13,14 +13,14 @@ pub trait Stack {
 
 impl Stack for Cpu {
     fn push(&mut self, value: Byte) {
-        let address = STACK_OFFSET + (self.stack_pointer as Word);
+        let address = self.stack_pointer as Word;
         self.stack_pointer -= 1;
         self.memory.write(address, value);
     }
 
     fn pop(&mut self) -> Byte {
+        let address = self.stack_pointer as Word;
         self.stack_pointer += 1;
-        let address = STACK_OFFSET + (self.stack_pointer as Word);
         self.memory.read(address)
     }
 

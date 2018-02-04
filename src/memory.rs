@@ -69,18 +69,18 @@ impl Memory for MappedMemory {
     fn read(&self, address: Word) -> Byte {
         match AddressMapping::from_word(address) {
             AddressMapping::Ram    => self.ram.read(address),
-            AddressMapping::Ppu    => unimplemented!(),
-            AddressMapping::Input  => unimplemented!(),
-            AddressMapping::Apu    => unimplemented!(),
+            AddressMapping::Ppu    => 0,
+            AddressMapping::Input  => 0,
+            AddressMapping::Apu    => 0,
             AddressMapping::Mapper => self.mapper.read(address),
         }
     }
     fn write(&mut self, address: Word, value: Byte) {
         match AddressMapping::from_word(address) {
             AddressMapping::Ram    => self.ram.write(address, value),
-            AddressMapping::Ppu    => unimplemented!(),
-            AddressMapping::Input  => unimplemented!(),
-            AddressMapping::Apu    => unimplemented!(),
+            AddressMapping::Ppu    => (),
+            AddressMapping::Input  => (),
+            AddressMapping::Apu    => (),
             AddressMapping::Mapper => self.mapper.write(address, value),
         }
     }

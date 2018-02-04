@@ -267,9 +267,12 @@ impl Instruction {
             0x94 => Instruction::STY (Address::ZeroPageX        (byte (program))),
             0x8C => Instruction::STY (Address::Absolute         (word (program))),
 
+            0xF8 => Instruction::SED (Address::Implicit),
+            0x78 => Instruction::SEI (Address::Implicit),
+
             _    => unreachable!(),
         };
-        trace!("Parsed opcode {:?} -> {:?}", opcode, instruction);
+        trace!("Parsed opcode {:#x} -> {:?}", opcode, instruction);
         instruction
     }
 

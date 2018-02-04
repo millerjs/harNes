@@ -115,7 +115,7 @@ impl Cartridge {
     }
 
     pub fn mapper_code(&self) -> Byte {
-        1 // MMC1 for now
+        (self.header.flag_6 & 0b11110000) | ((self.header.flag_7 & 0b11110000) << 4)
     }
 }
 

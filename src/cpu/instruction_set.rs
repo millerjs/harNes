@@ -205,7 +205,14 @@ impl InstructionSet for Cpu {
     /// loaded into the PC and the break flag in the status set to
     /// one.
     fn brk(&mut self, _: &Address) {
-        // TODO
+        let program_counter = self.program_counter;
+        let flags = self.flags.to_byte();
+
+        self.push_word(program_counter);
+        self.push_word(program_counter+1);
+        self.push(flags);
+        self.flags.break_mode = true; // TODO ?
+        self.program_counter = self.load_word(&Address::Absolute(0xFFFE));
     }
 
     /// BVC - Branch if Overflow Clear

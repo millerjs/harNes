@@ -36,7 +36,10 @@ impl Cpu {
     pub fn run(mut self) {
         info!("Starting NES!");
         self.reset();
-        self.step();
+        for i in 0..100 {
+            trace!("Step number {}", i);
+            self.step();
+        }
     }
 
     fn step(&mut self) {
@@ -44,9 +47,12 @@ impl Cpu {
         let instruction = Instruction::from_byte_code(self.memory.slice(program_counter));
         trace!("Read instruction {:?}", instruction);
         self.cycles += instruction.length();
+        self.execute_instruction(&instruction);
+        self.program_counter += instruction.length() as Word;
     }
 
     fn reset(&mut self) {
+        self.stack_pointer = 255;
         self.program_counter = self.load_word(&Address::Absolute(0xFFFC));
         trace!("Reset program counter to {:#x}", self.program_counter);
     }
