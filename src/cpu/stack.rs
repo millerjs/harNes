@@ -8,7 +8,7 @@ pub trait Stack {
     fn push(&mut self, value: Byte);
     fn pop(&mut self) -> Byte;
     fn push_word(&mut self, value: Word);
-    fn pop_word(&mut self, value: Word) -> Word;
+    fn pop_word(&mut self) -> Word;
 }
 
 impl Stack for Cpu {
@@ -20,8 +20,9 @@ impl Stack for Cpu {
 
     fn pop(&mut self) -> Byte {
         let address = self.stack_pointer as Word;
+        let value = self.memory.read(address);
         self.stack_pointer += 1;
-        self.memory.read(address)
+        value
     }
 
     fn push_word(&mut self, value: Word) {
@@ -30,8 +31,9 @@ impl Stack for Cpu {
         self.push(big);
     }
 
-    fn pop_word(&mut self, value: Word) -> Word {
-        let (little, big) = (self.pop(), self.pop());
+    fn pop_word(&mut self) -> Word {
+        let little = self.pop();
+        let big = self.pop();
         Word::from_bytes(little, big)
     }
 }

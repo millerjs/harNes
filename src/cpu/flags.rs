@@ -1,7 +1,7 @@
 use ::types::*;
 use ::cpu::Cpu;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Flags {
     pub carry: bool,
     pub zero: bool,

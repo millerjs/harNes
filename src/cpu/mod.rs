@@ -36,10 +36,15 @@ impl Cpu {
     pub fn run(mut self) {
         info!("Starting NES!");
         self.reset();
-        for step in 0..120 {
+        for step in 0..10000 {
+            // if step >= 115 { self.print_registers() }
             print!("{}:\t", step);
             self.step();
         }
+    }
+
+    pub fn print_registers(&self) {
+        print!("A: {}\tY: {}\tX: {}\t{:?}\n", self.accumulator, self.register_y, self.register_x, self.flags);
     }
 
     fn step(&mut self) {

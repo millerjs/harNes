@@ -91,8 +91,9 @@ impl Cpu {
 #[macro_export]
 macro_rules! branch {
     ($self:ident, $condition: expr, $address: expr) => {{
-        let condition = $condition;
-        $self.program_counter = $self.compute_address($address);
+        if $condition {
+            $self.program_counter = $self.compute_address($address);
+        }
     }};
 }
 
@@ -143,24 +144,24 @@ impl InstructionSet for Cpu {
     ///
     /// If the carry flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
-    fn bcc(&mut self, _: &Address) {
-        // branch!(self, !self.flags.carry)
+    fn bcc(&mut self, address: &Address) {
+        branch!(self, !self.flags.carry, address)
     }
 
     /// BCS - Branch if Carry Set
     ///
     /// If the carry flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
-    fn bcs(&mut self, _: &Address) {
-        // branch!(self, self.flags.carry)
+    fn bcs(&mut self, address: &Address) {
+        branch!(self, self.flags.carry, address)
     }
 
     /// BEQ - Branch if Equal
     ///
     /// If the zero flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
-    fn beq(&mut self, _: &Address) {
-        // branch!(self, self.flags.zero)
+    fn beq(&mut self, address: &Address) {
+        branch!(self, self.flags.zero, address)
     }
 
     /// BIT - Bit Test
@@ -181,8 +182,8 @@ impl InstructionSet for Cpu {
     ///
     /// If the negative flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
-    fn bmi(&mut self, _: &Address) {
-        // branch!(self, self.flags.negative)
+    fn bmi(&mut self, address: &Address) {
+        branch!(self, self.flags.negative, address)
     }
 
     /// BNE - Branch if Not Equal
@@ -198,8 +199,8 @@ impl InstructionSet for Cpu {
     /// If the negative flag is clear then add the relative
     /// displacement to the program counter to cause a branch to a new
     /// location.
-    fn bpl(&mut self, _: &Address) {
-        // branch!(self, !self.flags.negative)
+    fn bpl(&mut self, address: &Address) {
+        branch!(self, !self.flags.negative, address)
     }
 
     /// BRK - Force Interrupt
@@ -500,7 +501,8 @@ impl InstructionSet for Cpu {
     /// return to the calling routine. It pulls the program counter
     /// (minus one) from the stack.
     fn rts(&mut self, _: &Address) {
-        // TODO
+        let return_point = self.pop_word();
+        self.program_counter = return_point + 1;
     }
 
     /// SBC - Subtract with Carry
