@@ -15,14 +15,6 @@ macro_rules! compare {
 }
 
 #[macro_export]
-macro_rules! branch {
-    ($self:ident, $condition: expr) => {{
-        let condition = $condition;
-        $self.branch(condition);
-    }};
-}
-
-#[macro_export]
 macro_rules! increment {
     ($self:ident, $value: expr, $amount: expr) => {{
         let result = ($value as Byte).wrapping_add($amount as Byte);

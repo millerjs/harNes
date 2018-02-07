@@ -94,7 +94,7 @@ pub enum Address {
 impl Address {
     pub fn length(&self) -> usize {
         match *self {
-            Address::Absolute(_)         => 1,
+            Address::Absolute(_)         => 3,
             Address::AbsoluteIndexedX(_) => 3,
             Address::AbsoluteIndexedY(_) => 3,
             Address::Accumulator         => 1,

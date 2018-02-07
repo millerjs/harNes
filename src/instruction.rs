@@ -71,7 +71,8 @@ impl Instruction {
     pub fn from_byte_code(program: &[Byte]) -> Instruction {
         let size = 0;
         let opcode = program[0];
-        trace!("Parsing opcode {:?}", opcode);
+        trace!("Parsing opcode {:#x}", opcode);
+        print!("[{:#x}]\t{:#x}\t{:#x}\t{:#x}\t{:#x}", opcode, program[1], program[2], program[3], program[4]);
 
         let instruction = match opcode {
             // ADC
@@ -269,6 +270,9 @@ impl Instruction {
 
             0xF8 => Instruction::SED (Address::Implicit),
             0x78 => Instruction::SEI (Address::Implicit),
+            0xd8 => Instruction::CLD (Address::Implicit),
+
+            0xd0 => Instruction::BNE (Address::Relative         (byte (program))),
 
             _    => unreachable!(),
         };

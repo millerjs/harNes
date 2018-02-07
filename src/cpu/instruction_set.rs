@@ -74,22 +74,27 @@ impl Cpu {
     }
 
 
-    /// All branches are relative mode and have a length of two
-    /// bytes
-    ///
-    /// A branch not taken requires two machine cycles. Add one if the
-    /// branch is taken and add one more if the branch crosses a page
-    /// boundary.
-    #[inline(always)]
-    pub fn branch(&mut self, condition: bool) {
-        let address = self.increment_program_counter();
-        let delta = self.load(&Address::Absolute(address)) as i8;
-        if condition {
-            self.program_counter = (self.program_counter as i32 + delta as i32) as Word;
-        }
-    }
+    // /// All branches are relative mode and have a length of two
+    // /// bytes
+    // ///
+    // /// A branch not taken requires two machine cycles. Add one if the
+    // /// branch is taken and add one more if the branch crosses a page
+    // /// boundary.
+    // #[inline(always)]
+    // pub fn branch(&mut self, condition: bool, address: &Address) {
+    //     if condition {
+
+    //     }
+    // }
 }
 
+#[macro_export]
+macro_rules! branch {
+    ($self:ident, $condition: expr, $address: expr) => {{
+        let condition = $condition;
+        $self.program_counter = $self.compute_address($address);
+    }};
+}
 
 impl InstructionSet for Cpu {
     /// ADC - Add with Carry
@@ -139,7 +144,7 @@ impl InstructionSet for Cpu {
     /// If the carry flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bcc(&mut self, _: &Address) {
-        branch!(self, !self.flags.carry)
+        // branch!(self, !self.flags.carry)
     }
 
     /// BCS - Branch if Carry Set
@@ -147,7 +152,7 @@ impl InstructionSet for Cpu {
     /// If the carry flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn bcs(&mut self, _: &Address) {
-        branch!(self, self.flags.carry)
+        // branch!(self, self.flags.carry)
     }
 
     /// BEQ - Branch if Equal
@@ -155,7 +160,7 @@ impl InstructionSet for Cpu {
     /// If the zero flag is set then add the relative displacement to
     /// the program counter to cause a branch to a new location.
     fn beq(&mut self, _: &Address) {
-        branch!(self, self.flags.zero)
+        // branch!(self, self.flags.zero)
     }
 
     /// BIT - Bit Test
@@ -177,15 +182,15 @@ impl InstructionSet for Cpu {
     /// If the negative flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bmi(&mut self, _: &Address) {
-        branch!(self, self.flags.negative)
+        // branch!(self, self.flags.negative)
     }
 
     /// BNE - Branch if Not Equal
     ///
     /// If the zero flag is clear then add the relative displacement
     /// to the program counter to cause a branch to a new location.
-    fn bne(&mut self, _: &Address) {
-        branch!(self, !self.flags.zero)
+    fn bne(&mut self, address: &Address) {
+        branch!(self, !self.flags.zero, address)
     }
 
     /// BPL - Branch if Positive
@@ -194,7 +199,7 @@ impl InstructionSet for Cpu {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bpl(&mut self, _: &Address) {
-        branch!(self, !self.flags.negative)
+        // branch!(self, !self.flags.negative)
     }
 
     /// BRK - Force Interrupt
@@ -221,7 +226,7 @@ impl InstructionSet for Cpu {
     /// displacement to the program counter to cause a branch to a new
     /// location.
     fn bvc(&mut self, _: &Address) {
-        branch!(self, !self.flags.overflow)
+        // branch!(self, !self.flags.overflow)
     }
 
     /// BVS - Branch if Overflow Set
@@ -229,7 +234,7 @@ impl InstructionSet for Cpu {
     /// If the overflow flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
     fn bvs(&mut self, _: &Address) {
-        branch!(self, self.flags.overflow)
+        // branch!(self, self.flags.overflow)
     }
 
     /// CLC - Clear Carry Flag
@@ -335,7 +340,7 @@ impl InstructionSet for Cpu {
     /// Adds one to the X register setting the zero and negative flags
     /// as appropriate.
     fn inx(&mut self, _: &Address) {
-        self.register_y = increment!(self, self.register_y, 1);
+        self.register_x = increment!(self, self.register_x, 1);
     }
 
     /// INY - Increment Y Register
@@ -343,7 +348,7 @@ impl InstructionSet for Cpu {
     /// Adds one to the Y register setting the zero and negative flags
     /// as appropriate.
     fn iny(&mut self, _: &Address) {
-        self.register_x = increment!(self, self.register_x, 1);
+        self.register_y = increment!(self, self.register_y, 1);
     }
 
     /// JMP - Jump
@@ -351,7 +356,7 @@ impl InstructionSet for Cpu {
     /// Sets the program counter to the address specified by the
     /// operand.
     fn jmp(&mut self, address: &Address) {
-        self.program_counter = self.load_word(address);
+        self.program_counter = self.compute_address(address);
     }
 
     /// JSR - Jump to Subroutine
@@ -362,7 +367,7 @@ impl InstructionSet for Cpu {
     fn jsr(&mut self, address: &Address) {
         let return_point = self.program_counter - 1;
         self.push_word(return_point);
-        self.program_counter = self.load_word(address)
+        self.program_counter = self.compute_address(address);
     }
 
     /// LDA - Load Accumulator

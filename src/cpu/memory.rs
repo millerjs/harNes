@@ -23,7 +23,7 @@ impl Cpu {
                 self.load(&Address::Absolute(byte as Word + self.register_y as Word)) as Word
             },
             Address::Relative(byte) => {
-                self.load(&Address::Absolute(byte as Word + self.register_y as Word)) as Word
+                ((self.program_counter as i32) + (byte as i8) as i32) as Word
             },
             Address::ZeroPage(byte) => {
                 byte as Word
@@ -33,7 +33,7 @@ impl Cpu {
             },
             Address::ZeroPageY(byte) => {
                 (self.register_y + byte) as Word
-            },
+            }
             _ => unreachable!()
         }
     }
@@ -44,6 +44,7 @@ impl Cpu {
         trace!("Loading byte from {:?}", address);
         match *address {
             Address::Accumulator => self.accumulator,
+            Address::Immediate(byte) => byte,
             _ => {
                 let computed = self.compute_address(address);
                 self.memory.read(computed)
