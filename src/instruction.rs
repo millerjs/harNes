@@ -72,7 +72,6 @@ impl Instruction {
         let size = 0;
         let opcode = program[0];
         trace!("Parsing opcode {:#x}", opcode);
-        print!("[{:#x}]\t{:#x}\t{:#x}\t{:#x}\t{:#x}", opcode, program[1], program[2], program[3], program[4]);
 
         let instruction = match opcode {
             // ADC

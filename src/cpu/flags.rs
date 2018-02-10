@@ -1,7 +1,7 @@
 use ::types::*;
 use ::cpu::Cpu;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct Flags {
     pub carry: bool,
     pub zero: bool,
@@ -12,17 +12,23 @@ pub struct Flags {
     pub negative: bool,
 }
 
+impl Default for Flags {
+    fn default() -> Flags {
+        Flags::from_byte(0b00000100)
+    }
+}
+
 
 impl Flags {
     pub fn to_byte(&self) -> Byte {
         let mut status = 0;
-        status &=  self.carry             as u8;
-        status &= (self.zero              as u8) << 1;
-        status &= (self.interrupt_disable as u8) << 2;
-        status &= (self.decimal_mode      as u8) << 3;
-        status &= (self.break_mode        as u8) << 4;
-        status &= (self.overflow          as u8) << 5;
-        status &= (self.negative          as u8) << 7;
+        status |=  self.carry             as u8;
+        status |= (self.zero              as u8) << 1;
+        status |= (self.interrupt_disable as u8) << 2;
+        status |= (self.decimal_mode      as u8) << 3;
+        status |= (self.break_mode        as u8) << 4;
+        status |= (self.overflow          as u8) << 5;
+        status |= (self.negative          as u8) << 7;
         status
     }
 

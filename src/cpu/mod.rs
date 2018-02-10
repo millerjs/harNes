@@ -38,24 +38,24 @@ impl Cpu {
         self.reset();
         for step in 0..10000 {
             // if step >= 115 { self.print_registers() }
-            print!("{}:\t", step);
+            print!("{}\t", step);
+            self.trace();
             self.step();
         }
     }
 
-    pub fn print_registers(&self) {
-        print!("A: {}\tY: {}\tX: {}\t{:?}\n", self.accumulator, self.register_y, self.register_x, self.flags);
+    pub fn trace(&self) {
+        print!("{:#x}\t", self.program_counter);
+        let program = self.memory.slice(self.program_counter);
+        print!("{:#x}\t{:#x}\t{:#x}\t", program[0], program[1], program[2]);
+        print!("{:#x}\t{:#x}\t{:#x}\t{:#x}\n", self.accumulator, self.register_x, self.register_y, self.flags.to_byte());
     }
 
     fn step(&mut self) {
-        print!("{:#x}: ", self.program_counter);
         let instruction = Instruction::from_byte_code(self.memory.slice(self.program_counter));
-        print!("\t{:?}", instruction);
-        trace!("Read instruction {:?}", instruction);
         // self.cycles += instruction.length();
         self.program_counter += instruction.length() as Word;
         self.execute_instruction(&instruction);
-        println!("");
     }
 
     fn reset(&mut self) {

@@ -64,7 +64,7 @@ pub trait InstructionSet {
 
 use cpu::{Cpu, Flags};
 use ::stack::*;
-
+use std::fmt::Display;
 impl Cpu {
     /// Increments the program and returns the previous value
     #[inline(always)]
@@ -72,7 +72,6 @@ impl Cpu {
         self.flags.zero     = a.eq(&b);
         self.flags.negative = a.gt(&b);
     }
-
 
     // /// All branches are relative mode and have a length of two
     // /// bytes
@@ -86,6 +85,14 @@ impl Cpu {
 
     //     }
     // }
+}
+
+#[macro_export]
+macro_rules! set_flags {
+    ($self:ident, $result: expr) => {{
+        $self.flags.zero = $result == 0;
+        $self.flags.negative = is!($result & 0b10000000);
+    }};
 }
 
 #[macro_export]
@@ -377,7 +384,7 @@ impl InstructionSet for Cpu {
     /// and negative flags as appropriate.
     fn lda(&mut self, address: &Address) {
         self.accumulator = self.load(address);
-        compare!(self, self.accumulator, 0)
+        set_flags!(self, self.accumulator)
     }
 
     /// LDX - Load X Register
@@ -386,7 +393,7 @@ impl InstructionSet for Cpu {
     /// and negative flags as appropriate.
     fn ldx(&mut self, address: &Address) {
         self.register_x = self.load(address);
-        compare!(self, self.register_x, 0)
+        set_flags!(self, self.register_x)
     }
 
     /// LDY - Load Y Register
@@ -395,7 +402,7 @@ impl InstructionSet for Cpu {
     /// and negative flags as appropriate.
     fn ldy(&mut self, address: &Address) {
         self.register_y = self.load(address);
-        compare!(self, self.register_y, 0)
+        set_flags!(self, self.register_y);
     }
 
     /// LSR - Logical Shift Right
@@ -407,7 +414,7 @@ impl InstructionSet for Cpu {
         let value = self.load(address);
         self.flags.carry = is!(0b10000000 & value);
         let result = (value << 1) & 0b1;
-        compare!(self, result, 0);
+        set_flags!(self, result);
         self.store(address, value);
     }
 
@@ -424,7 +431,7 @@ impl InstructionSet for Cpu {
     /// contents using the contents of a byte of memory.
     fn ora(&mut self, address: &Address) {
         self.accumulator = self.load(address) | self.accumulator;
-        compare!(self, self.accumulator, 0);
+        set_flags!(self, self.accumulator);
     }
 
     /// PHA - Push Accumulator
@@ -450,7 +457,7 @@ impl InstructionSet for Cpu {
     /// appropriate.
     fn pla(&mut self, _: &Address) {
         self.accumulator = self.pop();
-        compare!(self, self.accumulator, 0);
+        set_flags!(self, self.accumulator);
     }
 
     /// PLP - Pull Processor Status
