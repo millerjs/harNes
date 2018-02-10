@@ -18,7 +18,7 @@ macro_rules! compare {
 macro_rules! increment {
     ($self:ident, $value: expr, $amount: expr) => {{
         let result = ($value as Byte).wrapping_add($amount as Byte);
-        compare!($self, result, 0);
+        set_flags!($self, result);
         result
     }};
 }

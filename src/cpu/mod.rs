@@ -37,7 +37,6 @@ impl Cpu {
         info!("Starting NES!");
         self.reset();
         for step in 0..10000 {
-            // if step >= 115 { self.print_registers() }
             print!("{}\t", step);
             self.trace();
             self.step();
