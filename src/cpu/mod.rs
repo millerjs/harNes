@@ -36,7 +36,7 @@ impl Cpu {
     pub fn run(mut self) {
         info!("Starting NES!");
         self.reset();
-        for step in 0..10000 {
+        for step in 0..100000 {
             print!("{}\t", step);
             self.trace();
             self.step();
@@ -47,7 +47,9 @@ impl Cpu {
         print!("{:#x}\t", self.program_counter);
         let program = self.memory.slice(self.program_counter);
         print!("{:#x}\t{:#x}\t{:#x}\t", program[0], program[1], program[2]);
-        print!("{:#x}\t{:#x}\t{:#x}\t{:#x}\n", self.accumulator, self.register_x, self.register_y, self.flags.to_byte());
+        print!("{:#x}\t{:#x}\t{:#x}\t{:#x}", self.accumulator, self.register_x, self.register_y, self.flags.to_byte());
+        print!("\t{}", self.stack_trace());
+        println!("");
     }
 
     fn step(&mut self) {
@@ -58,7 +60,7 @@ impl Cpu {
     }
 
     fn reset(&mut self) {
-        self.stack_pointer = 255;
+        self.stack_pointer = 0xfd;
         self.program_counter = self.load_word(&Address::Absolute(0xFFFC));
         trace!("Reset program counter to {:#x}", self.program_counter);
     }

@@ -37,7 +37,6 @@ impl Default for MappedMemory {
     }
 }
 
-
 impl MappedMemory {
     pub fn insert_cartridge(mut self, cartridge: Cartridge) -> Self {
         self.mapper = mappers::from_cartridge(cartridge);

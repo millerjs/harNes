@@ -27,7 +27,7 @@ impl Flags {
         status |= (self.interrupt_disable as u8) << 2;
         status |= (self.decimal_mode      as u8) << 3;
         status |= (self.break_mode        as u8) << 4;
-        status |= (self.overflow          as u8) << 5;
+        status |= (self.overflow          as u8) << 6;
         status |= (self.negative          as u8) << 7;
         status
     }
@@ -39,7 +39,7 @@ impl Flags {
             interrupt_disable: is!(byte & 0b00000100),
             decimal_mode:      is!(byte & 0b00001000),
             break_mode:        is!(byte & 0b00010000),
-            overflow:          is!(byte & 0b00100000),
+            overflow:          is!(byte & 0b01000000),
             negative:          is!(byte & 0b10000000),
         }
     }

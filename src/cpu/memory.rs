@@ -17,10 +17,10 @@ impl Cpu {
                 self.register_y as Word + byte as Word
             },
             Address::IndirectIndexed(byte) => {
-                self.load(&Address::Absolute(byte as Word)) as Word + self.register_y as Word
+                self.load(&Address::ZeroPage(byte)) as Word + self.register_y as Word
             },
             Address::IndexedIndirect(byte) => {
-                self.load(&Address::Absolute(byte as Word + self.register_y as Word)) as Word
+                self.load(&Address::ZeroPage(byte)) as Word + self.register_x as Word
             },
             Address::Relative(byte) => {
                 ((self.program_counter as i32) + (byte as i8) as i32) as Word

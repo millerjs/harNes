@@ -272,6 +272,8 @@ impl Instruction {
             0xd8 => Instruction::CLD (Address::Implicit),
 
             0xd0 => Instruction::BNE (Address::Relative         (byte (program))),
+            0x30 => Instruction::BMI (Address::Relative         (byte (program))),
+            0x10 => Instruction::BPL (Address::Relative         (byte (program))),
 
             _    => unreachable!(),
         };

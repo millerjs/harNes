@@ -180,9 +180,9 @@ impl InstructionSet for Cpu {
     /// are copied into the N and V flags.
     fn bit(&mut self, address: &Address) {
         let mem = self.load(address);
-        self.flags.zero     = !is!(mem & self.accumulator);
-        self.flags.negative =  is!(mem & 0b01000000);
-        self.flags.overflow =  is!(mem & 0b00100000);
+        self.flags.zero = !is!(mem & self.accumulator);
+        self.flags.overflow = is!(mem & 0b01000000);
+        self.flags.negative = is!(mem & 0b10000000);
     }
 
     /// BMI - Branch if Minus
@@ -222,7 +222,6 @@ impl InstructionSet for Cpu {
         let flags = self.flags.to_byte();
 
         self.push_word(program_counter);
-        self.push_word(program_counter+1);
         self.push(flags);
         self.flags.break_mode = true; // TODO ?
         self.program_counter = self.load_word(&Address::Absolute(0xFFFE));
@@ -233,16 +232,16 @@ impl InstructionSet for Cpu {
     /// If the overflow flag is clear then add the relative
     /// displacement to the program counter to cause a branch to a new
     /// location.
-    fn bvc(&mut self, _: &Address) {
-        // branch!(self, !self.flags.overflow)
+    fn bvc(&mut self, address: &Address) {
+        branch!(self, !self.flags.overflow, address)
     }
 
     /// BVS - Branch if Overflow Set
     ///
     /// If the overflow flag is set then add the relative displacement
     /// to the program counter to cause a branch to a new location.
-    fn bvs(&mut self, _: &Address) {
-        // branch!(self, self.flags.overflow)
+    fn bvs(&mut self, address: &Address) {
+        branch!(self, self.flags.overflow, address)
     }
 
     /// CLC - Clear Carry Flag
@@ -499,7 +498,7 @@ impl InstructionSet for Cpu {
     /// processing routine. It pulls the processor flags from the
     /// stack followed by the program counter.
     fn rti(&mut self, _: &Address) {
-        // TODO
+        unimplemented!()
     }
 
     /// RTS - Return from Subroutine
